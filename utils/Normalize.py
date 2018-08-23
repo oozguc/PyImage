@@ -79,12 +79,14 @@ def fill_label_holes(lbl_img, **kwargs):
 
 def normalizeMinMax(x, mi, ma,axis = None, clip = False, dtype = np.float32):
         """ Normalizing an image between min and max """
-    
+        min = np.amin(x)
+        max = np.amax(x)
         try: 
             import numexpr
-            x = numexpr.evaluate("(x - mi ) / (ma - mi + eps)")
+            
+            x = numexpr.evaluate("mi + ((x - min ) / (max - min))*ma")
         except ImportError:
-               x = (x - mi) / (ma - mi)
+               x = mi + ((x - min ) / (max - min)) * ma
         if clip:
                x = np.clip(x, 0 , 1)
         
