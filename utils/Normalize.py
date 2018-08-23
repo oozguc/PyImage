@@ -4,6 +4,7 @@ import numpy as np
 import os
 import collections
 import warnings
+
 from tifffile import imsave
 from scipy.ndimage.morphology import distance_transform_edt, binary_fill_holes
 from scipy.ndimage.measurements import find_objects
@@ -75,7 +76,21 @@ def fill_label_holes(lbl_img, **kwargs):
         mask_filled = binary_fill_holes(grown_mask,**kwargs)[shrink_slice]
         lbl_img_filled[sl][mask_filled] = i
     return lbl_img_filled
-def normalize(x, pmin = 3, pmax = 99.8, axis = None, clip = False, eps = 1, dtype = np.float32):
+
+def normalizeMinMax(x, mi, ma,axis = None, clip = False, dtype = np.float32):
+        """ Normalizing an image between min and max """
+    
+        try: 
+            import numexpr
+            x = numexpr.evaluate("(x - mi ) / (ma - mi + eps)")
+        except ImportError:
+               x = (x - mi) / (ma - mi)
+        if clip:
+               x = np.clip(x, 0 , 1)
+        
+        return x 
+
+def normalizeFloat(x, pmin = 3, pmax = 99.8, axis = None, clip = False, eps = 1e-20, dtype = np.float32):
     """Percentile based Normalization"""
     mi = np.percentile(x, pmin, axis = axis, keepdims = True)
     ma = np.percentile(x, pmax, axis = axis, keepdims = True)
