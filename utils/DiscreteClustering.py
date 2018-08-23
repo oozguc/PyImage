@@ -5,8 +5,8 @@ from sklearn.cluster import spectral_clustering
 def Discretize_Clustering(twoDimg,N_REGIONS ):
       """Put clustering code"""
       graph = imp.img_to_graph(twoDimg)
-      beta = 5
-      eps = 1e-6
+      beta = 1
+      eps = 1e-1
       graph.data = np.exp(-beta * graph.data / twoDimg.std()) + eps 
       
     
