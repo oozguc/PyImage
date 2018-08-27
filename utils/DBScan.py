@@ -87,9 +87,9 @@ def show_clusters_DBSCAN(img_gray, cluster_list):
 
     for cluster, col in zip(cluster_list, colors):
         plt.plot(cluster.contour[:, 0], cluster.contour[:, 1], '.', color=col, alpha=0.5)
-
+     
     plt.title('Estimated number of clusters: %d' % len(cluster_list))
-
+    return cluster
 
 def segment_dbscan(img_gray, options):
 
