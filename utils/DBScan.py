@@ -38,7 +38,7 @@ def get_cluster_list(grid_points, in_labels, img, options):
 
     cluster_list = []
     single_cluster_mask = np.zeros(img_size, dtype=np.uint8)
-    cluster_image = -1*np.ones(img_size, dtype=np.int32)
+    cluster_image = np.zeros(img_size, dtype=np.int32)
 
     out_label = 1
     # plt.figure(10)
