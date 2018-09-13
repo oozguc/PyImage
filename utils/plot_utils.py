@@ -1,13 +1,33 @@
 from __future__ import print_function, unicode_literals, absolute_import, division
 from six.moves import range, zip, map, reduce, filter
 from six import string_types
-
+import matplotlib.pyplot as plt
+from matplotlib import cm
 import numpy as np
 
 from Normalize import normalizeMinMax, normalizeFloat
 
+def multiplot(imageA, imageB, imageC, titleA, titleB, titleC):
+    fig, axes = plt.subplots(1, 3, figsize=(15, 6))
+    ax = axes.ravel()
+    ax[0].imshow(imageA, cmap=cm.Spectral)
+    ax[0].set_title(titleA)
+    ax[0].set_axis_off()
+    ax[1].imshow(imageB, cmap=cm.Spectral)
+    ax[1].set_title(titleB)
+    ax[1].set_axis_off()
+    ax[2].imshow(imageC, cmap=cm.Spectral)
+    ax[2].set_title(titleB)
+    ax[2].set_axis_off()
+    plt.tight_layout()
+    plt.show()
 
 
+
+    for a in ax:
+      a.set_axis_off()
+
+    
 def plot_history(history,*keys,**kwargs):
     """Plot (Keras) training history returned by :func:`CARE.train`."""
     import matplotlib.pyplot as plt
