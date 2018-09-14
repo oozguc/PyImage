@@ -4,7 +4,29 @@ from scipy.signal import blackman
 from scipy.fftpack import fft, ifft
 from scipy.fftpack import fftfreq
 import numpy as np
-#FFT with filter
+
+
+def CrossCorrelationStrip(imageA, imageB):
+    crosscorrelation = np.empty(imageA.shape)
+    PointsSample = imageA.shape[1] 
+    for i in range(imageA.shape[0]):
+        stripA = imageA[i,:]
+        stripB = imageB[i,:]
+        stripCross = CrossCorrelation(stripA, stripB)
+        crosscorrelation[i,:] = stripCross
+    return crosscorrelation  
+
+def FFTStrip(imageA):
+    ffttotal = np.empty(imageA.shape)
+    PointsSample = imageA.shape[1] 
+    for i in range(imageA.shape[0]):
+        stripA = imageA[i,:]
+        
+        fftstrip = fft(stripA)
+        ffttotal[i,:] = np.abs(fftstrip)
+    return ffttotal 
+
+#FFT along a strip
 def doFilterFFT(image,Time_unit, filter):
    addedfft = 0 
    PointsSample = image.shape[1] 

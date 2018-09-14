@@ -27,7 +27,22 @@ def multiplot(imageA, imageB, imageC, titleA, titleB, titleC):
     for a in ax:
       a.set_axis_off()
 
-    
+def doubleplot(imageA, imageB, titleA, titleB):
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+    ax = axes.ravel()
+    ax[0].imshow(imageA, cmap=cm.Spectral)
+    ax[0].set_title(titleA)
+    ax[0].set_axis_off()
+    ax[1].imshow(imageB, cmap=cm.Spectral)
+    ax[1].set_title(titleB)
+    ax[1].set_axis_off()
+    plt.tight_layout()
+    plt.show()
+
+
+
+    for a in ax:
+      a.set_axis_off()
 def plot_history(history,*keys,**kwargs):
     """Plot (Keras) training history returned by :func:`CARE.train`."""
     import matplotlib.pyplot as plt
