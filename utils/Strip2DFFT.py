@@ -1,7 +1,7 @@
 
 
 from scipy.signal import blackman
-from scipy.fftpack import fft, ifft
+from scipy.fftpack import fft, ifft, fftshift
 from scipy.fftpack import fftfreq
 import numpy as np
 
@@ -22,7 +22,7 @@ def FFTStrip(imageA):
     for i in range(imageA.shape[0]):
         stripA = imageA[i,:]
         
-        fftstrip = fft(stripA)
+        fftstrip = fftshift(fft(stripA))
         ffttotal[i,:] = np.abs(fftstrip)
     return ffttotal 
 
@@ -66,8 +66,8 @@ def do2DInverseFFT(image, Space_unit, Time_unit, filter):
     return fftresult
 def CrossCorrelation(imageA, imageB):
     crosscorrelation = imageA
-    fftresultA = fft(imageA)
-    fftresultB = fft(imageB)
+    fftresultA = fftshift(fft(imageA))
+    fftresultB = fftshift(fft(imageB))
     multifft = fftresultA * np.conj(fftresultB)
-    crosscorrelation = ifft(multifft)
-    return np.abs(crosscorrelation)
+    crosscorrelation = fftshift(ifft(multifft))
+    return np.abs(crosscorrelation) 
