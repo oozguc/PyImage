@@ -13,7 +13,7 @@ def CrossCorrelationStrip(imageA, imageB):
     for i in range(imageA.shape[1]):
         
         stripB = imageB[:,i]
-        stripCross = CrossCorrelation(stripA, stripB)
+        stripCross = np.conjugate(stripA)* stripB
         PointsSample += stripCross
     PointsSample = PointsSample/max(PointsSample)
     return PointsSample  

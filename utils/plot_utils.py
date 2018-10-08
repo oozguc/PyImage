@@ -38,7 +38,7 @@ def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC):
     ax[1].set_title(titleB)
     
     ax[2].plot(plotC)
-    ax[2].set_title(titleB)
+    ax[2].set_title(titleC)
     
     plt.tight_layout()
     plt.show()    
