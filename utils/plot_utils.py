@@ -31,7 +31,7 @@ def multiplot(imageA, imageB, imageC, titleA, titleB, titleC):
     
     
     
-def overlaymultiplot(plotA, plotB, titleA, titleB, targetdir, File):
+def overlaymultiplot(plotA, plotB, titleA, titleB, targetdir = None, File = None):
     fig, ax1 = plt.subplots()
     t = np.arange(0.01, 10.0, 0.01)
     ax1.plot(plotA, 'b-')
@@ -47,9 +47,16 @@ def overlaymultiplot(plotA, plotB, titleA, titleB, targetdir, File):
     ax2.tick_params('y', colors='r')
 
     fig.tight_layout()
-    plt.show() 
     Title = titleA + titleB
-    plt.savefig(targetdir + Title + File + '.png')
+    if targetdir is not None and File is not None:
+      plt.savefig(targetdir + Title + File + '.png')
+    if targetdir is not None and File is None:
+      plt.savefig(targetdir + Title + File + '.png')
+    plt.show() 
+   
+    
+    
+    
 def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC):
     fig, axes = plt.subplots(1, 3, figsize=(15, 6))
     ax = axes.ravel()
@@ -64,7 +71,7 @@ def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC):
     
     plt.tight_layout()
     plt.show()    
-    
+       
 def doubleplot(imageA, imageB, titleA, titleB):
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
     ax = axes.ravel()
