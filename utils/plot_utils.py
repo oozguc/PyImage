@@ -27,6 +27,9 @@ def multiplot(imageA, imageB, imageC, titleA, titleB, titleC):
     for a in ax:
       a.set_axis_off()
 
+
+    
+    
     
 def overlaymultiplot(plotA, plotB, titleA, titleB, targetdir, File):
     fig, ax1 = plt.subplots()
@@ -45,7 +48,8 @@ def overlaymultiplot(plotA, plotB, titleA, titleB, targetdir, File):
 
     fig.tight_layout()
     plt.show() 
-    plt.savefig(targetdir + 'FFTPlot' + File + '.png')
+    Title = titleA + titleB
+    plt.savefig(targetdir + Title + File + '.png')
 def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC):
     fig, axes = plt.subplots(1, 3, figsize=(15, 6))
     ax = axes.ravel()
