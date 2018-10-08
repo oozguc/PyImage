@@ -27,6 +27,22 @@ def multiplot(imageA, imageB, imageC, titleA, titleB, titleC):
     for a in ax:
       a.set_axis_off()
 
+    
+def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC):
+    fig, axes = plt.subplots(1, 3, figsize=(15, 6))
+    ax = axes.ravel()
+    ax[0].plot(plotA)
+    ax[0].set_title(titleA)
+   
+    ax[1].plot(plotB)
+    ax[1].set_title(titleB)
+    
+    ax[2].plot(plotC)
+    ax[2].set_title(titleB)
+    
+    plt.tight_layout()
+    plt.show()    
+    
 def doubleplot(imageA, imageB, titleA, titleB):
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
     ax = axes.ravel()
@@ -39,7 +55,17 @@ def doubleplot(imageA, imageB, titleA, titleB):
     plt.tight_layout()
     plt.show()
 
-
+def doubleplotline(plotA, plotB, titleA, titleB):
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+    ax = axes.ravel()
+    ax[0].plot(plotA)
+    ax[0].set_title(titleA)
+   
+    ax[1].plot(plotB)
+    ax[1].set_title(titleB)
+    
+    plt.tight_layout()
+    plt.show()
 
     for a in ax:
       a.set_axis_off()

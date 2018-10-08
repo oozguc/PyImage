@@ -7,14 +7,16 @@ import numpy as np
 
 
 def CrossCorrelationStrip(imageA, imageB):
-    crosscorrelation = np.empty(imageA.shape)
+    
     PointsSample = imageA.shape[1] 
-    for i in range(imageA.shape[0]):
-        stripA = imageA[i,:]
-        stripB = imageB[i,:]
+    stripA = imageA[:,0]
+    for i in range(imageA.shape[1]):
+        
+        stripB = imageB[:,i]
         stripCross = CrossCorrelation(stripA, stripB)
-        crosscorrelation[i,:] = stripCross
-    return crosscorrelation  
+        PointsSample += stripCross
+    PointsSample = PointsSample/max(PointsSample)
+    return PointsSample  
 
 def FFTStrip(imageA):
     ffttotal = np.empty(imageA.shape)
