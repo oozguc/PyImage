@@ -75,8 +75,7 @@ def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcali
     for _, angle, dist in zip(*hough_line_peaks(accumulator, thetas, rhos)):
      y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
      y1 = (dist - img.shape[1] * np.cos(angle)) / np.sin(angle)
-     if(angle > 90):
-       angle = 3.14 - angle
+    
         
      slope =  -( np.cos(angle) / np.sin(angle) )* Xcalibration / Tcalibration
     #Draw high slopes
