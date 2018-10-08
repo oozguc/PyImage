@@ -34,6 +34,17 @@ def FFTStrip(imageA):
         ffttotal[i,:] = np.abs(fftstrip)
     return ffttotal 
 
+
+def PhaseStrip(imageA):
+    ffttotal = np.empty(imageA.shape)
+    PointsSample = imageA.shape[1] 
+    for i in range(imageA.shape[0]):
+        stripA = imageA[i,:]
+        
+        fftstrip = fftshift(fft(stripA))
+        ffttotal[i,:] = np.angle(fftstrip)
+    return ffttotal
+
 #FFT along a strip
 def doFilterFFT(image,Time_unit, filter):
    addedfft = 0 
@@ -53,6 +64,7 @@ def doFilterFFT(image,Time_unit, filter):
    
    
    return addedfft[1:int(PointsSample//2)], xf[1:int(PointsSample//2)]
+
 
 
 def do2DFFT(image, Space_unit, Time_unit, filter):

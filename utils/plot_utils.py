@@ -7,7 +7,7 @@ import numpy as np
 
 from Normalize import normalizeMinMax, normalizeFloat
 
-def multiplot(imageA, imageB, imageC, titleA, titleB, titleC):
+def multiplot(imageA, imageB, imageC, titleA, titleB, titleC, targetdir = None, File = None, plotTitle = None):
     fig, axes = plt.subplots(1, 3, figsize=(15, 6))
     ax = axes.ravel()
     ax[0].imshow(imageA, cmap=cm.Spectral)
@@ -17,13 +17,10 @@ def multiplot(imageA, imageB, imageC, titleA, titleB, titleC):
     ax[1].set_title(titleB)
     ax[1].set_axis_off()
     ax[2].imshow(imageC, cmap=cm.Spectral)
-    ax[2].set_title(titleB)
+    ax[2].set_title(titleC)
     ax[2].set_axis_off()
     plt.tight_layout()
-    plt.show()
-
-
-
+    
     for a in ax:
       a.set_axis_off()
 
@@ -57,7 +54,7 @@ def overlaymultiplot(plotA, plotB, titleA, titleB, targetdir = None, File = None
     
     
     
-def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC):
+def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC, targetdir = None, File = None, plotTitle = None):
     fig, axes = plt.subplots(1, 3, figsize=(15, 6))
     ax = axes.ravel()
     ax[0].plot(plotA)
@@ -70,6 +67,15 @@ def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC):
     ax[2].set_title(titleC)
     
     plt.tight_layout()
+    
+    if plotTitle is not None:
+      Title = plotTitle
+    else :
+      Title = 'MultiPlot'   
+    if targetdir is not None and File is not None:
+      plt.savefig(targetdir + Title + File + '.png')
+    if targetdir is not None and File is None:
+      plt.savefig(targetdir + Title + File + '.png')
     plt.show()    
        
 def doubleplot(imageA, imageB, titleA, titleB):

@@ -54,7 +54,7 @@ def hough_linetransform(img, angle_step=1, lines_are_white=True, value_threshold
     return accumulator, thetas, rhos
 
 
-def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration, slope_threshold, save_path=None, File = None):
+def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration, low_slope_threshold,high_slope_threshold, save_path=None, File = None):
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(1, 3, figsize=(10, 10))
@@ -79,7 +79,8 @@ def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcali
         
      slope =  -( np.cos(angle) / np.sin(angle) )* Xcalibration / Tcalibration
     #Draw high slopes
-     if(np.abs(slope) > slope_threshold):
+     
+     if(np.abs(angle * 180 / 3.14) < high_slope_threshold and np.abs(angle * 180 / 3.14) > low_slope_threshold ):
       print("Estimated Wave Velocity : " ,np.abs(slope))   
     
       ax[2].plot((0, img.shape[1]), (y0, y1), '-r')
