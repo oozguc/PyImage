@@ -28,6 +28,24 @@ def multiplot(imageA, imageB, imageC, titleA, titleB, titleC):
       a.set_axis_off()
 
     
+def overlaymultiplot(plotA, plotB, titleA, titleB):
+    fig, ax1 = plt.subplots()
+    t = np.arange(0.01, 10.0, 0.01)
+    ax1.plot(plotA, 'b-')
+    
+    # Make the y-axis label, ticks and tick labels match the line color.
+    ax1.set_ylabel(titleA, color='b')
+    ax1.tick_params('y', colors='b')
+
+    ax2 = ax1.twinx()
+     
+    ax2.plot(plotB, 'r.')
+    ax2.set_ylabel(titleB, color='r')
+    ax2.tick_params('y', colors='r')
+
+    fig.tight_layout()
+    plt.show() 
+    
 def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC):
     fig, axes = plt.subplots(1, 3, figsize=(15, 6))
     ax = axes.ravel()
