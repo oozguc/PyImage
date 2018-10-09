@@ -13,13 +13,16 @@ def CrossCorrelationStrip(imageA, imageB):
     stripB = imageB[:,0]
     stripCross = np.conjugate(stripA)* stripB
     Initial = 0
+    x = []
+    for i in range(stripA.shape[0]):
+      x.append(i)
     for i in range(imageA.shape[1]):
         
         stripB = imageB[:,i]
         stripCross = np.conjugate(stripA)* stripB
         PointsSample += stripCross
         
-    return PointsSample  
+    return PointsSample, x  
 
 
     
@@ -29,19 +32,26 @@ def FFTStrip(imageA):
     PointsSample = imageA.shape[1] 
     for i in range(imageA.shape[0]):
         stripA = imageA[i,:]
-        
+       
         fftstrip = fftshift(fft(stripA))
         ffttotal[i,:] = np.abs(fftstrip)
     return ffttotal 
 
-
+def PhaseDiffStrip(imageA):
+    diff = np.empty(imageA.shape)
+    value = np.empty(imageA.shape)
+    for i in range(imageA.shape[0] - 1):
+       
+        diff[i, :] = imageA[i,:] - imageA[i + 1, :]
+    return diff
+    
 def PhaseStrip(imageA):
     ffttotal = np.empty(imageA.shape)
     PointsSample = imageA.shape[1] 
     for i in range(imageA.shape[0]):
         stripA = imageA[i,:]
         
-        fftstrip = fftshift(fft(stripA))
+        fftstrip = (fft(stripA))
         ffttotal[i,:] = np.angle(fftstrip)
     return ffttotal
 
@@ -55,6 +65,7 @@ def doFilterFFT(image,Time_unit, filter):
       if filter == False:
        w = 1
       strip = image[i,:]
+       
       fftresult = fft(w * strip)
       addedfft += np.abs(fftresult)  
    #addedfft/=image.shape[0]
