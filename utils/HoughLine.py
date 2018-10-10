@@ -34,7 +34,7 @@ def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcali
      y1 = (dist - img.shape[1] * np.cos(angle)) / np.sin(angle)
     
         
-     slope =  -( np.cos(angle) / np.sin(angle) )* Xcalibration / Tcalibration
+     slope =  -( np.cos(angle) / np.sin(angle) )* (Xcalibration / Tcalibration)
     #Draw high slopes
      
      if(np.abs(angle * 180 / 3.14) < high_slope_threshold and np.abs(angle * 180 / 3.14) > low_slope_threshold ):
