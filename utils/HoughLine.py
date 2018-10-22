@@ -37,7 +37,7 @@ def show_ransac_line(img, Xcalibration, Time_unit, maxlines, min_samples=2, resi
     ax.imshow(img)
     
 
-def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration, low_slope_threshold,high_slope_threshold, save_path=None, File = None):
+def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration, low_slope_threshold,high_slope_threshold,intensity_threshold, save_path=None, File = None):
     import matplotlib.pyplot as plt
 
     fig, ax = plt.subplots(1, 3, figsize=(10, 10))
@@ -55,7 +55,7 @@ def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcali
     ax[1].set_ylabel('Distance (pixels)')
     ax[1].axis('image')
     ax[2].imshow(img, cmap=cm.gray)
-    for _, angle, dist in zip(*hough_line_peaks(accumulator, thetas, rhos)):
+    for _, angle, dist in zip(*hough_line_peaks(accumulator, thetas, rhos, threshold = intensity_threshold* np.max(accumulator))):
      y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
      y1 = (dist - img.shape[1] * np.cos(angle)) / np.sin(angle)
     
