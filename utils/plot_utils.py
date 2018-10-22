@@ -122,16 +122,21 @@ def multiplotlineX(plotA, plotB, x,  titleA, titleB, targetdir = None, File = No
     if targetdir is not None and File is None:
       plt.savefig(targetdir + Title + File + '.png')
     plt.show()        
+
     
+def singleplot(imageA, titleA):
+    plt.imshow(imageA, cmap = cm.Spectral, label = titleA)
+    
+    plt.show()
 def doubleplot(imageA, imageB, titleA, titleB):
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
     ax = axes.ravel()
     ax[0].imshow(imageA, cmap=cm.Spectral)
     ax[0].set_title(titleA)
-    ax[0].set_axis_off()
+    
     ax[1].imshow(imageB, cmap=cm.Spectral)
     ax[1].set_title(titleB)
-    ax[1].set_axis_off()
+    
     plt.tight_layout()
     plt.show()
 
