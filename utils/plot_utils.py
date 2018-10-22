@@ -26,7 +26,28 @@ def multiplot(imageA, imageB, imageC, titleA, titleB, titleC, targetdir = None, 
 
 
     
+def overlaymultiplotX(plotA, plotB, x, titleA, titleB, targetdir = None, File = None):
+    fig, ax1 = plt.subplots()
+    t = np.arange(0.01, 10.0, 0.01)
+    ax1.plot(x,plotA, 'b-', linestyle = 'solid')
     
+    # Make the y-axis label, ticks and tick labels match the line color.
+    ax1.set_ylabel(titleA, color='b')
+    
+
+    ax2 = ax1.twinx()
+     
+    ax2.plot(x, plotB, 'r.', linestyle = 'solid')
+    ax2.set_ylabel(titleB, color='r')
+    ax2.tick_params('y', colors='r')
+    fig.tight_layout()
+    Title = titleA + titleB
+    if targetdir is not None and File is not None:
+      plt.savefig(targetdir + Title + File + '.png')
+    if targetdir is not None and File is None:
+      plt.savefig(targetdir + Title + File + '.png')
+    plt.show() 
+       
     
 def overlaymultiplot(plotA, plotB, titleA, titleB, targetdir = None, File = None):
     fig, ax1 = plt.subplots()
@@ -84,7 +105,7 @@ def multiplotlineX(plotA, plotB, x,  titleA, titleB, targetdir = None, File = No
     ax = axes.ravel()
     ax[0].plot(x,plotA)
     ax[0].set_title(titleA)
-   
+    
     ax[1].plot(x,plotB)
     ax[1].set_title(titleB)
     
