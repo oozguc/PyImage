@@ -77,7 +77,31 @@ def multiplotline(plotA, plotB, plotC, titleA, titleB, titleC, targetdir = None,
     if targetdir is not None and File is None:
       plt.savefig(targetdir + Title + File + '.png')
     plt.show()    
-       
+
+def multiplotlineX(plotA, plotB, x,  titleA, titleB, targetdir = None, File = None, plotTitle = None):
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+   
+    ax = axes.ravel()
+    ax[0].plot(x,plotA)
+    ax[0].set_title(titleA)
+   
+    ax[1].plot(x,plotB)
+    ax[1].set_title(titleB)
+    
+    
+    
+    plt.tight_layout()
+    
+    if plotTitle is not None:
+      Title = plotTitle
+    else :
+      Title = 'MultiPlot'   
+    if targetdir is not None and File is not None:
+      plt.savefig(targetdir + Title + File + '.png')
+    if targetdir is not None and File is None:
+      plt.savefig(targetdir + Title + File + '.png')
+    plt.show()        
+    
 def doubleplot(imageA, imageB, titleA, titleB):
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
     ax = axes.ravel()
