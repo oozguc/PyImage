@@ -4,12 +4,38 @@ import math
 from skimage.transform import (hough_line, hough_line_peaks,
                                probabilistic_hough_line)
 from matplotlib import cm
-
+import matplotlib.pyplot as plt
+from skimage.measure import LineModelND, ransac
 def rgb2gray(rgb):
     return np.dot(rgb[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
 
 
+def show_ransac_line(img, Xcalibration, Time_unit, maxlines, min_samples=2, residual_threshold=0.1, max_trials=1000):
+    points = np.array(np.nonzero(img)).T
 
+    f, ax = plt.subplots(figsize = (10, 10))
+
+    points = points[:, ::-1]
+
+    for i in range(maxlines):
+  
+     
+    # robustly fit line only using inlier data with RANSAC algorithm
+     model_robust, inliers = ransac(points, LineModelND,  min_samples=min_samples,
+                               residual_threshold=residual_threshold, max_trials=max_trials)
+     slope , intercept = model_robust.params
+ 
+     points = points[~inliers]   
+
+     print("Estimated Wave Velocity by Ransac : " ,np.abs(slope[0])* (Xcalibration / Time_unit)) 
+     x0 = np.arange(img.shape[1])   
+ 
+     y0 =  model_robust.predict_y(x0)
+ 
+     plt.plot(x0, model_robust.predict_y(x0), '-r')
+ 
+    ax.imshow(img)
+    
 
 def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration, low_slope_threshold,high_slope_threshold, save_path=None, File = None):
     import matplotlib.pyplot as plt
