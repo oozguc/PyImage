@@ -49,7 +49,7 @@ def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcali
     ax[1].imshow(
         accumulator, cmap=cm.gray,
         extent=[np.rad2deg(thetas[-1]), np.rad2deg(thetas[0]), rhos[-1], rhos[0]])
-    ax[1].set_aspect('equal', adjustable='box')
+    
     ax[1].set_title('Hough transform')
     ax[1].set_xlabel('Angles (degrees)')
     ax[1].set_ylabel('Distance (pixels)')

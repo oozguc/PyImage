@@ -160,7 +160,7 @@ def doubleplot(imageA, imageB, titleA, titleB):
     plt.tight_layout()
     plt.show()
 
-def doubleplotline(plotA, plotB, titleA, titleB):
+def doubleplotline(plotA, plotB, titleA, titleB, targetdir = None, File = None, plotTitle = None):
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
     ax = axes.ravel()
     ax[0].plot(plotA)
@@ -170,10 +170,15 @@ def doubleplotline(plotA, plotB, titleA, titleB):
     ax[1].set_title(titleB)
     
     plt.tight_layout()
+    if plotTitle is not None:
+      Title = plotTitle
+    else :
+      Title = 'MultiPlot'   
+    if targetdir is not None and File is not None:
+      plt.savefig(targetdir + Title + File + '.png')
+    if targetdir is not None and File is None:
+      plt.savefig(targetdir + Title + File + '.png')
     plt.show()
-
-    for a in ax:
-      a.set_axis_off()
 def plot_history(history,*keys,**kwargs):
     """Plot (Keras) training history returned by :func:`CARE.train`."""
     import matplotlib.pyplot as plt
