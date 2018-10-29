@@ -123,10 +123,10 @@ def multiplotlineX(plotA, plotB, x,  titleA, titleB, targetdir = None, File = No
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
    
     ax = axes.ravel()
-    ax[0].plot(x,plotA)
+    ax[0].plot(x,plotA, 'ro')
     ax[0].set_title(titleA)
     
-    ax[1].plot(x,plotB)
+    ax[1].plot(x,plotB, 'ro')
     ax[1].set_title(titleB)
     
     
