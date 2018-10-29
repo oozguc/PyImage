@@ -26,7 +26,7 @@ def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_
  outliers = inliers == False
  # generate coordinates of estimated models
  line_x = np.arange(0, 100)
-
+ line_y = model.predict_y(line_x)
  line_y_robust = model_robust.predict_y(line_x)
  
  #print('Model Fit' , 'yVal = ' , line_y_robust)
@@ -34,11 +34,12 @@ def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_
  ax.plot(points[:, 0], points[:, 1], '.b', alpha=0.6,
         label='Inlier data')
  
- 
+ ax.plot(line_x, line_y, '-r', label='Normal line model')
  ax.plot(line_x, line_y_robust, '-b', label='Robust line model')
  ax.legend(loc='lower left')
     
- print('Slope = ', (line_y_robust[99] - line_y_robust[0])/ (100) )   
+ print('Slope = ', (line_y_robust[99] - line_y_robust[0])/ (100) ) 
+ print('Normal Slope = ', (line_y[99] - line_y_robust[0])/ (100) ) 
  plt.show()
  
     
