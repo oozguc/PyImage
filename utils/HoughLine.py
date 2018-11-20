@@ -83,28 +83,21 @@ def show_ransac_line(img, Xcalibration, Time_unit, maxlines, min_samples=2, resi
     ax.imshow(img)
     
 
-def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_unit,low_slope_threshold,high_slope_threshold,intensity_threshold):
+def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_unit,low_slope_threshold,high_slope_threshold,intensity_threshold, SupressView = True):
  distance = ndi.distance_transform_edt(image)
  local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((3, 3)),
                             labels=image)
  markers = ndi.label(local_maxi)[0]
  labels = watershed(-distance, markers, mask=image)
 
- fig, axes = plt.subplots(ncols=3, figsize=(9, 3), sharex=True, sharey=True)
- ax = axes.ravel()
 
- ax[0].imshow(image, cmap=plt.cm.gray, interpolation='nearest')
- ax[0].set_title('Overlapping objects')
- ax[1].imshow(-distance, cmap=plt.cm.gray, interpolation='nearest')
- ax[1].set_title('Distances')
- ax[2].imshow(labels, cmap=plt.cm.nipy_spectral, interpolation='nearest')
- ax[2].set_title('Separated objects')
+
     
     
  nonormimg = remove_small_objects(labels, min_size=size, connectivity=4, in_place=False)
  nonormimg, forward_map, inverse_map = relabel_sequential(nonormimg)    
  labels = nonormimg
-
+ Velocity = []
 
  # loop over the unique labels returned by the Watershed
  # algorithm
@@ -115,58 +108,74 @@ def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_u
      
       mask = np.zeros(image.shape, dtype="uint8")
       mask[labels == label] = 1
-      plt.imshow(mask)  
+        
       h, theta, d = hough_line(mask)  
-      show_hough_linetransform(mask, h, theta, d, Xcalibration, 
+      velocity = show_hough_linetransform(mask, h, theta, d, Xcalibration, 
                                Time_unit,low_slope_threshold,high_slope_threshold,intensity_threshold, targetdir, Filename[0])
 
-      save_tiff_imagej_compatible((targetdir + Label + str(label) +os.path.basename(Filename[0]) +os.path.basename(Filename[1]) ) ,  mask,       'YX')
+      Velocity.append(velocity)
+ return Velocity    
 
- for a in ax:
-    a.set_axis_off()
-
- fig.tight_layout()
- plt.show()
     
-def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration, low_slope_threshold,high_slope_threshold,intensity_threshold, save_path=None, File = None):
+def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration, low_slope_threshold,high_slope_threshold,intensity_threshold, save_path=None, File = None, SupressView = True):
     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots(1, 3, figsize=(10, 10))
+    #fig, ax = plt.subplots(1, 2, figsize=(10, 10))
 
-    ax[0].imshow(img, cmap=plt.cm.gray)
-    ax[0].set_title('Input image')
-    ax[0].axis('image')
+   
 
-    ax[1].imshow(
-        accumulator, cmap=cm.gray,
-        extent=[np.rad2deg(thetas[-1]), np.rad2deg(thetas[0]), rhos[-1], rhos[0]])
+    #ax[0].imshow(
+        #accumulator, cmap=cm.gray,
+        #extent=[np.rad2deg(thetas[-1]), np.rad2deg(thetas[0]), rhos[-1], rhos[0]])
     
-    ax[1].set_title('Hough transform')
-    ax[1].set_xlabel('Angles (degrees)')
-    ax[1].set_ylabel('Distance (pixels)')
-    ax[1].axis('image')
-    ax[2].imshow(img, cmap=cm.gray)
+    #ax[0].set_title('Hough transform')
+    #ax[0].set_xlabel('Angles (degrees)')
+    #ax[0].set_ylabel('Distance (pixels)')
+    #ax[0].axis('image')
+    #ax[1].imshow(img, cmap=cm.gray)
+    
+    bestpeak = 0
+    bestslope = 0
+    besty0 = 0
+    besty1 = 0
+    Est_vel = []
     for _, angle, dist in zip(*hough_line_peaks(accumulator, thetas, rhos, threshold = intensity_threshold* np.max(accumulator))):
      y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
      y1 = (dist - img.shape[1] * np.cos(angle)) / np.sin(angle)
     
-        
+     pixelslope =   -( np.cos(angle) / np.sin(angle) )
+     pixelintercept =  dist / np.sin(angle)  
      slope =  -( np.cos(angle) / np.sin(angle) )* (Xcalibration / Tcalibration)
-    #Draw high slopes
      
-     if(np.abs(angle * 180 / 3.14) < high_slope_threshold and np.abs(angle * 180 / 3.14) > low_slope_threshold ):
-      print("Estimated Wave Velocity : " ,np.abs(slope))   
+    #Draw high slopes
+     peak = 0;
+     for index, pixel in np.ndenumerate(img):
+            x, y = index
+            vals = img[x,y]
+            if np.abs(y - pixelslope * x - pixelintercept) <= 5:
+                peak+=vals
+                if peak >= bestpeak:
+                    bestpeak = peak
+                    bestslope = slope
+                    besty0 = y0
+                    besty1 = y1
+   
     
-      ax[2].plot((0, img.shape[1]), (y0, y1), '-r')
     
-      ax[2].set_xlim((0, img.shape[1]))
-      ax[2].set_ylim((img.shape[0], 0))
-      ax[2].set_axis_off()
-      ax[2].set_title('Detected lines')
+    #ax[1].plot((0, img.shape[1]), (besty0, besty1), '-r')
+    
+    #ax[1].set_xlim((0, img.shape[1]))
+    #ax[1].set_ylim((img.shape[0], 0))
+    #ax[1].set_axis_off()
+    #ax[1].set_title('Detected lines')
 
     # plt.axis('off')
     if save_path is not None and File is not None:
-        plt.savefig(save_path + 'HoughPlot' + File + '.png')
+       plt.savefig(save_path + 'HoughPlot' + File + '.png')
     if save_path is not None and File is None:
-         plt.savefig(save_path + 'HoughPlot' + '.png')
-    plt.show()
+        plt.savefig(save_path + 'HoughPlot' + '.png')
+  
+    
+       #plt.show()
+
+    return np.abs(bestslope)    
