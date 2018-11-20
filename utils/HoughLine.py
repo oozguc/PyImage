@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from skimage.measure import LineModelND, ransac
 
 from scipy import ndimage as ndi
-
+from skimage.filters import roberts, sobel, scharr, prewitt, gaussian
 from skimage.morphology import watershed
 from skimage.feature import peak_local_max
 from Normalize import save_tiff_imagej_compatible
@@ -83,20 +83,29 @@ def show_ransac_line(img, Xcalibration, Time_unit, maxlines, min_samples=2, resi
     ax.imshow(img)
     
 
-def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_unit,low_slope_threshold,high_slope_threshold,intensity_threshold, SupressView = True):
+def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_unit):
  distance = ndi.distance_transform_edt(image)
- local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((3, 3)),
+ 
+ plt.imshow(distance)
+ plt.title('Distance transform')   
+ plt.show()  
+ 
+ local_maxi = peak_local_max(distance, indices=False, footprint=np.ones((1, 1)),
                             labels=image)
  markers = ndi.label(local_maxi)[0]
  labels = watershed(-distance, markers, mask=image)
 
-
-
-    
-    
  nonormimg = remove_small_objects(labels, min_size=size, connectivity=4, in_place=False)
  nonormimg, forward_map, inverse_map = relabel_sequential(nonormimg)    
  labels = nonormimg
+
+    
+    
+ 
+ plt.imshow(labels)
+ plt.title('Watershed labels')   
+ plt.show()
+ print('Doing Hough in +' , np.unique(labels) , 'labels')
  Velocity = []
  Images = []
  Besty0 = []
@@ -110,19 +119,21 @@ def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_u
      
       mask = np.zeros(image.shape, dtype="uint8")
       mask[labels == label] = 1
-        
+     
+          
       h, theta, d = hough_line(mask)  
       img, besty0, besty1, velocity = show_hough_linetransform(mask, h, theta, d, Xcalibration, 
-                               Time_unit,low_slope_threshold,high_slope_threshold,intensity_threshold, targetdir, Filename[0])
+                               Time_unit,targetdir, Filename[0])
 
-      Velocity.append(velocity)
-      Images.append(img)
-      Besty0.append(besty0)
-      Besty1.append(besty1)
+      if np.abs(velocity) > 1.0E-5:  
+       Velocity.append(velocity)
+       Images.append(img)
+       Besty0.append(besty0)
+       Besty1.append(besty1)
  return Velocity, Images, Besty0, Besty1    
 
     
-def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration, low_slope_threshold,high_slope_threshold,intensity_threshold, save_path=None, File = None, SupressView = True):
+def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration,  save_path=None, File = None):
     import matplotlib.pyplot as plt
 
     #fig, ax = plt.subplots(1, 2, figsize=(10, 10))
@@ -144,7 +155,7 @@ def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcali
     besty0 = 0
     besty1 = 0
     Est_vel = []
-    for _, angle, dist in zip(*hough_line_peaks(accumulator, thetas, rhos, threshold = intensity_threshold* np.max(accumulator))):
+    for _, angle, dist in zip(*hough_line_peaks(accumulator, thetas, rhos)):
      y0 = (dist - 0 * np.cos(angle)) / np.sin(angle)
      y1 = (dist - img.shape[1] * np.cos(angle)) / np.sin(angle)
     
@@ -157,7 +168,7 @@ def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcali
      for index, pixel in np.ndenumerate(img):
             x, y = index
             vals = img[x,y]
-            if np.abs(y - pixelslope * x - pixelintercept) <= 5:
+            if  vals > 0:
                 peak+=vals
                 if peak >= bestpeak:
                     bestpeak = peak
