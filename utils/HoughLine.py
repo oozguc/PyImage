@@ -73,7 +73,7 @@ def show_ransac_line(img, Xcalibration, Time_unit, maxlines, min_samples=2, resi
  
      points = points[~inliers]   
 
-     print("Estimated Wave Velocity by Ransac : " ,np.abs(slope[0])* (Xcalibration / Time_unit)) 
+     print("Estimated Wave Velocity by Ransac : " , np.abs(slope[0])* (Xcalibration / Time_unit)) 
      x0 = np.arange(img.shape[1])   
  
      y0 =  model_robust.predict_y(x0)
@@ -98,7 +98,9 @@ def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_u
  nonormimg, forward_map, inverse_map = relabel_sequential(nonormimg)    
  labels = nonormimg
  Velocity = []
-
+ Images = []
+ Besty0 = []
+ Besty1 = []
  # loop over the unique labels returned by the Watershed
  # algorithm
  for label in np.unique(labels):
@@ -110,11 +112,14 @@ def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_u
       mask[labels == label] = 1
         
       h, theta, d = hough_line(mask)  
-      velocity = show_hough_linetransform(mask, h, theta, d, Xcalibration, 
+      img, besty0, besty1, velocity = show_hough_linetransform(mask, h, theta, d, Xcalibration, 
                                Time_unit,low_slope_threshold,high_slope_threshold,intensity_threshold, targetdir, Filename[0])
 
       Velocity.append(velocity)
- return Velocity    
+      Images.append(img)
+      Besty0.append(besty0)
+      Besty1.append(besty1)
+ return Velocity, Images, Besty0, Besty1    
 
     
 def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcalibration, low_slope_threshold,high_slope_threshold,intensity_threshold, save_path=None, File = None, SupressView = True):
@@ -178,4 +183,4 @@ def show_hough_linetransform(img, accumulator, thetas, rhos, Xcalibration, Tcali
     
        #plt.show()
 
-    return np.abs(bestslope)    
+    return (img,besty0, besty1, bestslope)    
