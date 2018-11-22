@@ -4,7 +4,28 @@ from scipy.signal import blackman
 from scipy.fftpack import fft, ifft, fftshift
 from scipy.fftpack import fftfreq
 import numpy as np
+from scipy.signal import find_peaks
 
+
+def show_peak(onedimg, frequ, veto_frequ):
+
+    peaks, _ = find_peaks(onedimg)
+
+
+    above_threshfrequ = []
+    maxval = 0
+    reqpeak =0
+    for x in peaks:
+      if(frequ[x] > veto_frequ):
+        above_threshfrequ.append(x)
+    for i in range(0,len(above_threshfrequ)):
+      if onedimg[above_threshfrequ[i]] > maxval:
+        maxval = onedimg[above_threshfrequ[i]]
+        reqpeak = frequ[above_threshfrequ[i]] 
+        
+    frqY = reqpeak  
+    
+    return frqY
 
 def CrossCorrelationStrip(imageA, imageB):
     
