@@ -9,19 +9,28 @@ from copy import deepcopy
 import scipy
 
 import pylab
-def StripFit(image):
+def StripFit(image, Time_unit, Xcalibration):
     
-    X = []
-    I = []
+    Fwhm = []
+    Time = []
     for i in range(image.shape[1]):
+        X = []
+        I = []
         strip = image[2:image.shape[0]-2,i]
         
         for j in range(strip.shape[0]):
            X.append(j)
            I.append(strip[j]) 
            
-        print('Co-ordinate List Size: ', len(X), 'Intensity List Size:', len(I))
-        Linescan(X,I)
+        
+        GaussFit = Linescan(X,I)
+        GaussFit.extract_ls_parameters()
+        fwhm = GaussFit.fwhm
+        if fwhm > 0:
+            Fwhm.append(fwhm* Xcalibration)
+            Time.append(i* Time_unit)
+       
+    return Fwhm, Time    
         
         
 def gauss_func(p, x):
@@ -117,7 +126,7 @@ class Linescan():
         self.get_peak()
         self.get_i_in_out()
         self.get_fwhm()
-
+       
     def get_peak(self):
         """Finds the peak position and intensity of a linescan by fitting
         a Gaussian near the peak.
