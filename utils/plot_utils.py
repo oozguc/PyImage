@@ -154,8 +154,8 @@ def multiplotlineX(plotA, plotB, x,  titleA, titleB, targetdir = None, File = No
 
     
 def singleplot(imageA, titleA):
-    plt.imshow(imageA, cmap = cm.Spectral, label = titleA)
-    
+    plt.imshow(imageA, cmap = cm.Spectral)
+    plt.title(titleA)
     plt.show()
 def doubleplot(imageA, imageB, titleA, titleB):
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
