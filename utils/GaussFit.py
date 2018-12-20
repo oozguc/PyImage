@@ -1,7 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import optimize, stats
+import os
+import math
+from copy import deepcopy
 
 
+import scipy
+
+import pylab
 def StripFit(image):
     
     X = []
@@ -71,8 +78,8 @@ class Linescan():
             i (list of numbers): the intensity values
         """
         #populate linescan position/intensity
-        self.x = np.array(map(float,x)) #position list as NumPy array of floats
-        self.i = np.array(map(float,i)) #intensity list as NumPy array of floats
+        self.x = np.asarray(x) #position list as NumPy array of floats
+        self.i = np.asarray(i) #intensity list as NumPy array of floats
 
         #detminere a few easy parameters from position/intensity
         self.H = self.x[-1] - self.x[0]
@@ -117,7 +124,7 @@ class Linescan():
         """
 
         #restricts fitting to near the center of the linescan
-        self.max_idx = np.argmax(self.i[len(self.i)/2-6:len(self.i)/2+20]) + len(self.i)/2-6
+        self.max_idx = np.argmax(self.i[int(len(self.i)/2-6):int(len(self.i)/2+20)]) + int(len(self.i)/2-6)
         self.x_fit = self.x[self.max_idx-2:self.max_idx+3]
         self.i_fit = self.i[self.max_idx-2:self.max_idx+3]
 
