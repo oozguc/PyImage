@@ -29,7 +29,7 @@ def StripFit(image, Time_unit, Xcalibration):
         if fwhm > 0:
             Fwhm.append(fwhm* Xcalibration)
             Time.append(i* Time_unit)
-       
+    print('Mean Thickness (Before outlier removal) = ', str('%.3f'%(sum(Fwhm)/len(Fwhm))), 'um')    
     return Fwhm, Time    
         
         

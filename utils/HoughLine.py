@@ -21,7 +21,7 @@ def rgb2gray(rgb):
     return np.dot(rgb[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
 
 
-def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_trials=1000, Xrange = 100):
+def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_trials=1000, Xrange = 100, displayoutlier= False):
    
     # fit line using all data
  model = LineModelND()
@@ -44,7 +44,9 @@ def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_
  #print('Model Fit', 'xVal = ' , line_x)
  ax.plot(points[inliers, 0], points[inliers, 1], '.b', alpha=0.6,
         label='Inlier data')
- 
+ if displayoutlier:
+  ax.plot(points[outliers, 0], points[outliers, 1], '.r', alpha=0.6,
+        label='Outlier data')
  ax.plot(line_x, line_y, '-r', label='Normal line model')
  ax.plot(line_x, line_y_robust, '-b', label='Robust line model')
  ax.legend(loc='upper left')
@@ -53,7 +55,7 @@ def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_
  ax.set_ylabel('Thickness (um)')
  print('Ransac Slope = ', str('%.3e'%((line_y_robust[Xrange - 1] - line_y_robust[0])/ (Xrange)) )) 
  print('Regression Slope = ', str('%.3e'%((line_y[Xrange - 1] - line_y_robust[0])/ (Xrange)) )) 
- print('Mean Thickness = ', str('%.3f'%(sum(points[inliers, 1])/len(points[inliers, 1]))), 'um')   
+ print('Mean Thickness (After outlier removal) = ', str('%.3f'%(sum(points[inliers, 1])/len(points[inliers, 1]))), 'um')   
  plt.show()
  
     
