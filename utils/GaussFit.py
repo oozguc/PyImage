@@ -58,39 +58,32 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, Fitaround, psf):
     
     Thickness = []
     Time = []
+    assert(image.shape == membraneimage.shape)
     for i in range(image.shape[1]):
         X = []
         I = []
+        membraneimageX = []
+        membraneimageI = []
         strip = image[2:image.shape[0]-2,i]
-        
+        membraneimagestrip = membraneimage[2:membraneimage.shape[0]-2,i]
         for j in range(strip.shape[0]):
            X.append(j)
            I.append(strip[j]) 
-           
-        
-        GaussFit = Linescan(X,I, Fitaround)
-        GaussFit.extract_ls_parameters()
-        if i%100 == 0:
-         GaussFit.plot_gauss()
-        fwhm = GaussFit.fwhm
-        
-    for i in range(membraneimage.shape[1]):
-        membraneimageX = []
-        membraneimageI = []
-        membraneimagestrip = membraneimage[2:membraneimage.shape[0]-2,i]
-        
-        for j in range(membraneimagestrip.shape[0]):
            membraneimageX.append(j)
            membraneimageI.append(membraneimagestrip[j]) 
            
         
         membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround)
-        membraneimageGaussFit.extract_ls_parameters()   
+        membraneimageGaussFit.extract_ls_parameters()
+        
+        GaussFit = Linescan(X,I, Fitaround)
+        GaussFit.extract_ls_parameters()
         
         
-    CortexThickness = Cortex(GaussFit,membraneimageGaussFit,psf,ch_actin=1)  
-    CortexThickness.get_h_i_c()
-    print(CortexThickness.h)   
+        
+        CortexThickness = Cortex(GaussFit,membraneimageGaussFit,psf,ch_actin=1)  
+        CortexThickness.get_h_i_c()
+        print(CortexThickness.h)   
         
 
 
