@@ -84,6 +84,8 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, Fitaround, psf):
         CortexThickness = Cortex(GaussFit,membraneimageGaussFit,psf,ch_actin=1)  
         CortexThickness.get_h_i_c()
         if CortexThickness.h is not None :
+         CortexThickness.plot_lss()
+         CortexThickness.plot_fits()
          Thickness.append(CortexThickness.h * Xcalibration)
          Time.append(i * Time_unit)
            
