@@ -83,8 +83,11 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, Fitaround, psf):
         
         CortexThickness = Cortex(GaussFit,membraneimageGaussFit,psf,ch_actin=1)  
         CortexThickness.get_h_i_c()
-        print(CortexThickness.h)   
-        
+        if CortexThickness.h is not None :
+         Thickness.append(CortexThickness.h * Xcalibration)
+         Time.append(i * Time_unit)
+           
+    return Thickness, Time      
 
 
     
@@ -336,7 +339,7 @@ class Cortex():
         else:
             self.actin = None
             self.memb = None
-
+        
         self.h_max = 1. #maximum cortex thickness (for constraining fit)
         self.i_c_max = 500. #maximum cortex intensity (for constraining fit)
         self.h = None #cortex thickness (from fit)
@@ -353,7 +356,7 @@ class Cortex():
         """
 
         delta = abs(self.delta)
-
+        
         #SET STARTING VALUES FOR ROOTS AND SOLUTIONS
         self.solution = 2e+20
 
@@ -388,20 +391,20 @@ class Cortex():
                         pass
 
             #controls for bad fits
-            if any([self.solution>0.01,
-                    p1[0] >= self.h_max - 0.001,
-                    p1[1] >= self.i_c_max - 1.]):
-                 p1 = [None, None]
-                 self.h = None
-                 self.i_c = None
-                 self.density = None
-                 self.X_c = None
-                 self.solution = None
-            else:
-                self.h, self.i_c = p1
-                actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
-                self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
-                self.X_c = self.memb.x_peak - self.h / 2.
+            #if any([self.solution>0.01,
+             #       p1[0] >= self.h_max - 0.001,
+              #      p1[1] >= self.i_c_max - 1.]):
+               #  p1 = [None, None]
+                # self.h = None
+                 #self.i_c = None
+                 #self.density = None
+                 #self.X_c = None
+                 #self.solution = None
+            #else:
+            self.h, self.i_c = p1
+            actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
+            self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
+            self.X_c = self.memb.x_peak - self.h / 2.
 
     def residuals(self,p):
         """Calculates residuals for cortex linescan fit to extract cortex
