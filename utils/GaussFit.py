@@ -54,7 +54,7 @@ from copy import deepcopy
 import scipy
 
 import pylab
-def StripFit(image, membraneimage, Time_unit, Xcalibration, Fitaround, psf):
+def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, FitaroundOutside, psf, inisigmaguess):
     
     Thickness = []
     Time = []
@@ -73,10 +73,10 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, Fitaround, psf):
            membraneimageI.append(membraneimagestrip[j]) 
            
         
-        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround)
+        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, FitaroundInside, FitaroundOutside,inisigmaguess)
         membraneimageGaussFit.extract_ls_parameters()
         
-        GaussFit = Linescan(X,I, Fitaround)
+        GaussFit = Linescan(X,I, FitaroundInside, FitaroundOutside, inisigmaguess)
         GaussFit.extract_ls_parameters()
         
         
@@ -84,10 +84,12 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, Fitaround, psf):
         CortexThickness = Cortex(GaussFit,membraneimageGaussFit,psf,ch_actin=1)  
         CortexThickness.get_h_i_c()
         if CortexThickness.h is not None :
-         CortexThickness.plot_lss()
-         CortexThickness.plot_fits()
-         Thickness.append(CortexThickness.h * Xcalibration)
-         Time.append(i * Time_unit)
+            if i%100==0:
+               print('Time point:', i) 
+               CortexThickness.plot_lss()
+               CortexThickness.plot_fits()
+            Thickness.append(CortexThickness.h * Xcalibration)
+            Time.append(i * Time_unit)
            
     return Thickness, Time      
 
@@ -140,7 +142,7 @@ class Linescan():
     from linescans.
     """
 
-    def __init__(self,x,i, Fitaround):
+    def __init__(self,x,i, FitaroundInside, FitaroundOutside,inisigmaguess):
         """Initializes linescan.
         Args:
             x (list of numbers): the position values
@@ -149,11 +151,12 @@ class Linescan():
         #populate linescan position/intensity
         self.x = np.asarray(x) #position list as NumPy array of floats
         self.i = np.asarray(i) #intensity list as NumPy array of floats
-        
+        self.inisigmaguess = inisigmaguess
         #detminere a few easy parameters from position/intensity
         self.H = self.x[-1] - self.x[0]
         self.i_tot = np.trapz(self.i,self.x)
-        self.Fitaround = Fitaround
+        self.FitaroundInside = FitaroundInside
+        self.FitaroundOutside = FitaroundOutside
         #populate other attributes
         self.dist_to_x_in_out = 1. #specifies how far away x_in is from the peak (in um)
         self.gauss_params = None #parameter list from Gaussian fit to find peak
@@ -191,20 +194,22 @@ class Linescan():
         i_gauss_fit = gauss_func(self.gauss_params,self.x_fit)
         if self.gauss_params[1] > 0:
          plt.plot(x_gauss_fit,i_gauss_fit,'b')
+         
+         plt.show()
     def get_peak(self):
         """Finds the peak position and intensity of a linescan by fitting
         a Gaussian near the peak.
         """
         length = len(self.i)
         #restricts fitting to near the center of the linescan
-        self.max_idx = np.argmax(self.i[int(length/2- 6):int(length/2+ 20)]) + int(length/2-6)
+        self.max_idx = np.argmax(self.i[int(length/2- self.FitaroundOutside):int(length/2+ self.FitaroundInside)]) + int(length/2-self.FitaroundOutside)
         self.x_fit = self.x[self.max_idx-2:self.max_idx+2]
         self.i_fit = self.i[self.max_idx-2:self.max_idx+2]
 
         #picks reasonable starting values for fit
-        self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.Fitaround)])
+        self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.FitaroundInside/2)])
         a = (self.i[self.max_idx] - self.i_in_guess) / 2.4
-        sigma = 0.5
+        sigma = self.inisigmaguess
         mu = self.x[self.max_idx]
         b = self.i_in_guess
 
@@ -214,6 +219,7 @@ class Linescan():
                                         args=(self.x_fit, self.i_fit),
                                         maxfev = 1000000)
         self.gauss_params = p1
+        
         self.x_peak = p1[2]
         self.i_peak = gauss_func(p1, self.x_peak)
 
@@ -502,7 +508,7 @@ class Cortex():
         pylab.ylabel("Intensity (AU)")
         pylab.legend(loc='upper right')
         pylab.gcf().subplots_adjust(bottom=0.15)
-
+        pylab.show()
     def plot_fits(self):
         """Plots linescan pair with fitted cortex thickness"""
 
@@ -544,7 +550,7 @@ class Cortex():
         pylab.ylabel("Intensity (AU)")
         pylab.legend(loc='upper right')
         pylab.gcf().subplots_adjust(bottom=0.15)
-
+        pylab.show()
 def write_master_list(parent_dir,version):
     """Writes a master data lis in the parent directory for batch mode.
     Args:

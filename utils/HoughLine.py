@@ -47,8 +47,8 @@ def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_
  if displayoutlier:
   ax.plot(points[outliers, 0], points[outliers, 1], '.r', alpha=0.6,
         label='Outlier data')
- ax.plot(line_x, line_y, '-r', label='Normal line model')
- ax.plot(line_x, line_y_robust, '-b', label='Robust line model')
+ #ax.plot(line_x, line_y, '-r', label='Normal line model')
+ ax.plot(line_x, line_y_robust, '-g', label='Robust line model')
  ax.legend(loc='upper left')
    
  ax.set_xlabel('Time (s)')
