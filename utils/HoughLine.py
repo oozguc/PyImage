@@ -17,6 +17,34 @@ from skimage.morphology import remove_small_objects, binary_erosion
 from skimage.filters import threshold_otsu, threshold_mean
 from skimage.exposure import rescale_intensity
 import os
+from sklearn.preprocessing import PolynomialFeatures 
+from bokeh.io import export_png, output_notebook
+from bokeh.plotting import figure, output_file, show
+
+
+def show_poly_regression(X, Y, degree = 2):    
+ 
+ z = np.polyfit(X, Y, degree)
+ ffit = np.poly1d(z)
+ xp = np.linspace(-2, 6, 100)
+ print('Coefficients (High -> Low)', z) 
+ x_new = np.linspace(X[0], X[-1], 50)
+ y_new = ffit(x_new)
+ plt.plot(X,Y, x_new, y_new)
+ plt.title('Polynomial Fit') 
+ plt.xlabel('Time') 
+ plt.ylabel('Divisions') 
+  
+ plt.show()
+
+
+ p = figure(title='Division Counter', x_axis_label='Time', y_axis_label='Division Number')
+ p.line(x_new, y_new, legend = "Divisions-Time", line_width = 2)
+   
+ output_notebook()
+ show(p)
+
+
 def rgb2gray(rgb):
     return np.dot(rgb[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
 
