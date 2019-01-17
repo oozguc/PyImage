@@ -67,9 +67,11 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
         strip = image[2:image.shape[0]-2,i]
         membraneimagestrip = membraneimage[2:membraneimage.shape[0]-2,i]
         for j in range(strip.shape[0]):
-           X.append(j)
-           I.append(strip[j]) 
-           membraneimageX.append(j)
+           X.append(j * Xcalibration)
+           I.append(strip[j])
+            
+        for j in range(membraneimagestrip.shape[0]):    
+           membraneimageX.append(j * Xcalibration)
            membraneimageI.append(membraneimagestrip[j]) 
            
         
@@ -202,12 +204,12 @@ class Linescan():
         """
         length = len(self.i)
         #restricts fitting to near the center of the linescan
-        self.max_idx = np.argmax(self.i[int(length/2- self.FitaroundOutside):int(length/2+ self.FitaroundInside)]) + int(length/2-self.FitaroundOutside)
+        self.max_idx = np.argmax(self.i[int(length/2- self.FitaroundInside):int(length/2+ self.FitaroundOutside)]) + int(length/2-self.FitaroundInside)
         self.x_fit = self.x[self.max_idx-2:self.max_idx+2]
         self.i_fit = self.i[self.max_idx-2:self.max_idx+2]
 
         #picks reasonable starting values for fit
-        self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.FitaroundInside/2)])
+        self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.FitaroundOutside/2)])
         a = (self.i[self.max_idx] - self.i_in_guess) / 2.4
         sigma = self.inisigmaguess
         mu = self.x[self.max_idx]
@@ -236,15 +238,15 @@ class Linescan():
         x_in_upper = self.x_peak - self.dist_to_x_in_out
         x_in_upper_index = np.argmin(abs(self.x - x_in_upper))
         self.x_in_upper_index = x_in_upper_index #for use in finding total intensity for density calculation
-        self.i_in_x_list = self.x[int(x_in_upper_index-10):x_in_upper_index]
-        self.i_in_i_list = self.i[int(x_in_upper_index-10):x_in_upper_index]
+        self.i_in_x_list = self.x[int(x_in_upper_index-self.FitaroundOutside/2):x_in_upper_index]
+        self.i_in_i_list = self.i[int(x_in_upper_index-self.FitaroundOutside/2):x_in_upper_index]
         self.i_in = np.mean(self.i_in_i_list)
 
         x_out_lower = self.x_peak + self.dist_to_x_in_out
         x_out_lower_index = np.argmin(abs(self.x - x_out_lower))
         self.x_out_lower_index = x_out_lower_index #for use in finding total intensity for density calculation
-        self.i_out_x_list = self.x[x_out_lower_index:int(x_out_lower_index+10)]
-        self.i_out_i_list = self.i[x_out_lower_index:int(x_out_lower_index+10)]
+        self.i_out_x_list = self.x[x_out_lower_index:int(x_out_lower_index+self.FitaroundOutside/2)]
+        self.i_out_i_list = self.i[x_out_lower_index:int(x_out_lower_index+self.FitaroundOutside/2)]
         self.i_out = np.mean(self.i_out_i_list)
 
     def residuals_gauss(self,p,x,x_data):
@@ -398,17 +400,7 @@ class Cortex():
                     except TypeError:
                         pass
 
-            #controls for bad fits
-            #if any([self.solution>0.01,
-             #       p1[0] >= self.h_max - 0.001,
-              #      p1[1] >= self.i_c_max - 1.]):
-               #  p1 = [None, None]
-                # self.h = None
-                 #self.i_c = None
-                 #self.density = None
-                 #self.X_c = None
-                 #self.solution = None
-            #else:
+
             self.h, self.i_c = p1
             actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
             self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
