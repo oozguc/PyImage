@@ -49,7 +49,7 @@ from scipy import optimize, stats
 import os
 import math
 from copy import deepcopy
-
+from scipy.optimize import minimize
 
 import scipy
 
@@ -67,15 +67,15 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
         strip = image[2:image.shape[0]-2,i]
         membraneimagestrip = membraneimage[2:membraneimage.shape[0]-2,i]
         for j in range(strip.shape[0]):
-           X.append(j * Xcalibration)
+           X.append(j )
            I.append(strip[j])
             
         for j in range(membraneimagestrip.shape[0]):    
-           membraneimageX.append(j * Xcalibration)
+           membraneimageX.append(j )
            membraneimageI.append(membraneimagestrip[j]) 
            
         
-        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, FitaroundInside, FitaroundOutside,inisigmaguess)
+        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, FitaroundInside, FitaroundOutside, inisigmaguess)
         membraneimageGaussFit.extract_ls_parameters()
         
         GaussFit = Linescan(X,I, FitaroundInside, FitaroundOutside, inisigmaguess)
@@ -86,16 +86,21 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
         CortexThickness = Cortex(GaussFit,membraneimageGaussFit,psf,ch_actin=1)  
         CortexThickness.get_h_i_c()
         if CortexThickness.h is not None :
-            if i%100==0:
+            if i%10==0:
                print('Time point:', i) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
-            Thickness.append(CortexThickness.h * Xcalibration)
+            Thickness.append(CortexThickness.h * Xcalibration )
             Time.append(i * Time_unit)
            
     return Thickness, Time      
 
-
+def fit_func(x, a, sigma, mu, c ):
+    """Definition of gaussian function used to fit linescan peaks.
+    p = [a, sigma, mu, c].
+    """
+    g = a / (sigma * math.sqrt(2 * math.pi)) * scipy.exp(-(x - mu)**2 / (2 * sigma**2)) + c
+    return g
     
 def gauss_func(p, x):
     """Definition of gaussian function used to fit linescan peaks.
@@ -188,6 +193,7 @@ class Linescan():
     def extract_ls_parameters(self):
         """Extracts intensity and position information from linescan"""
 
+        
         self.get_peak()
         self.get_i_in_out()
         self.get_fwhm()
@@ -216,10 +222,10 @@ class Linescan():
         b = self.i_in_guess
 
         #perform fit with starting values
-        p0 = [a, sigma, mu, b]
-        p1, success  = optimize.leastsq(self.residuals_gauss,p0,
-                                        args=(self.x_fit, self.i_fit),
-                                        maxfev = 1000000)
+        #p0 = [a, sigma, mu, b]
+        p1, sucess  = optimize.curve_fit(fit_func,self.x_fit, self.i_fit,  p0 = [a, sigma, mu, b], maxfev = 1000000)
+        
+      
         self.gauss_params = p1
         
         self.x_peak = p1[2]
@@ -271,8 +277,9 @@ class Linescan():
 
         if all([sigma >= 0.1,
                abs(i_peak_guess - self.i[self.max_idx]) < 0.5 * self.i[self.max_idx]]):
-
+    
             residuals = gauss_func(p,x) - x_data
+            
             return residuals
 
         else:
@@ -359,20 +366,15 @@ class Cortex():
         self.solution = None #solution from actin cortex thickness fit
 
     def get_h_i_c(self):
-        """ Performs fit to get cortex thickness, h, and cortex intensity, i_c
-         Note: density is calculated as the difference between fitted cortex intensity
-         and intracellular background, normalized by the intensity from the beginning
-         of the linescan to end of the i_out calculation region
-        """
+       
 
-        delta = abs(self.delta)
+            delta = abs(self.delta)
         
-        #SET STARTING VALUES FOR ROOTS AND SOLUTIONS
-        self.solution = 2e+20
+            #SET STARTING VALUES FOR ROOTS AND SOLUTIONS
+            self.solution = 2e+20
 
-        #only try fitting if the peak is higher than both i_in and i_out
-        if ((self.actin.i_out - self.actin.i_peak) /
-                (self.actin.i_in - self.actin.i_peak))>=0:
+            #only try fitting if the peak is higher than both i_in and i_out
+      
 
             #loops through several different starting values for i_c and h
             for i_c_factor in np.arange(2.,3.1,0.2):
@@ -446,8 +448,8 @@ class Cortex():
         ax = fig.add_subplot(1,1,1)
 
         #plots raw data
-        pylab.plot(self.ch1.x,self.ch1.i,'go',label="Ch. 1")
-        pylab.plot(self.ch2.x,self.ch2.i,'ro',label="Ch. 2")
+        pylab.plot(self.ch1.x,self.ch1.i,'g',label="Ch. 1")
+        pylab.plot(self.ch2.x,self.ch2.i,'r',label="Ch. 2")
 
         #plots points used for determining i_in and i_out
         pylab.plot(self.ch1.i_in_x_list,self.ch1.i_in_i_list,'yo',label=r"$i_{\rm{in}}$, $i_{\rm{out}}$")
