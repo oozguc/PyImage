@@ -368,13 +368,14 @@ class Cortex():
     def get_h_i_c(self):
        
 
-            delta = abs(self.delta)
+          delta = abs(self.delta)
         
-            #SET STARTING VALUES FOR ROOTS AND SOLUTIONS
-            self.solution = 2e+20
+          #SET STARTING VALUES FOR ROOTS AND SOLUTIONS
+          self.solution = 2e+20
 
-            #only try fitting if the peak is higher than both i_in and i_out
-      
+          #only try fitting if the peak is higher than both i_in and i_out
+          if ((self.actin.i_out - self.actin.i_peak) /
+                (self.actin.i_in - self.actin.i_peak))>=0:
 
             #loops through several different starting values for i_c and h
             for i_c_factor in np.arange(2.,3.1,0.2):
@@ -403,10 +404,11 @@ class Cortex():
                         pass
 
 
-            self.h, self.i_c = p1
-            actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
-            self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
-            self.X_c = self.memb.x_peak - self.h / 2.
+           
+                self.h, self.i_c = p1
+                actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
+                self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
+                self.X_c = self.memb.x_peak - self.h / 2.
 
     def residuals(self,p):
         """Calculates residuals for cortex linescan fit to extract cortex
