@@ -67,11 +67,11 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
         strip = image[2:image.shape[0]-2,i]
         membraneimagestrip = membraneimage[2:membraneimage.shape[0]-2,i]
         for j in range(strip.shape[0]):
-           X.append(j )
+           X.append(j * Xcalibration)
            I.append(strip[j])
             
         for j in range(membraneimagestrip.shape[0]):    
-           membraneimageX.append(j )
+           membraneimageX.append(j * Xcalibration)
            membraneimageI.append(membraneimagestrip[j]) 
            
         
@@ -90,8 +90,9 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
                print('Time point:', i) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
-            Thickness.append(CortexThickness.h * Xcalibration )
-            Time.append(i * Time_unit)
+            if math.isnan(CortexThickness.h) == False:
+             Thickness.append((CortexThickness.h))
+             Time.append(i * Time_unit)
            
     return Thickness, Time      
 
@@ -244,15 +245,15 @@ class Linescan():
         x_in_upper = self.x_peak - self.dist_to_x_in_out
         x_in_upper_index = np.argmin(abs(self.x - x_in_upper))
         self.x_in_upper_index = x_in_upper_index #for use in finding total intensity for density calculation
-        self.i_in_x_list = self.x[int(x_in_upper_index-self.FitaroundOutside/2):x_in_upper_index]
-        self.i_in_i_list = self.i[int(x_in_upper_index-self.FitaroundOutside/2):x_in_upper_index]
+        self.i_in_x_list = self.x[int(x_in_upper_index-10):x_in_upper_index]
+        self.i_in_i_list = self.i[int(x_in_upper_index-10):x_in_upper_index]
         self.i_in = np.mean(self.i_in_i_list)
 
         x_out_lower = self.x_peak + self.dist_to_x_in_out
         x_out_lower_index = np.argmin(abs(self.x - x_out_lower))
         self.x_out_lower_index = x_out_lower_index #for use in finding total intensity for density calculation
-        self.i_out_x_list = self.x[x_out_lower_index:int(x_out_lower_index+self.FitaroundOutside/2)]
-        self.i_out_i_list = self.i[x_out_lower_index:int(x_out_lower_index+self.FitaroundOutside/2)]
+        self.i_out_x_list = self.x[x_out_lower_index:int(x_out_lower_index+10)]
+        self.i_out_i_list = self.i[x_out_lower_index:int(x_out_lower_index+10)]
         self.i_out = np.mean(self.i_out_i_list)
 
     def residuals_gauss(self,p,x,x_data):
