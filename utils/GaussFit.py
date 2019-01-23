@@ -76,10 +76,10 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
            
         
         membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, FitaroundInside, FitaroundOutside, inisigmaguess)
-        membraneimageGaussFit.extract_ls_parameters()
+       
         
         GaussFit = Linescan(X,I, FitaroundInside, FitaroundOutside, inisigmaguess)
-        GaussFit.extract_ls_parameters()
+       
         
         
         
@@ -90,7 +90,7 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
                print('Time point:', i) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
-            if math.isnan(CortexThickness.h) == False:
+            if math.isnan(CortexThickness.h) == False and CortexThickness.h > 0:
              Thickness.append((CortexThickness.h))
              Time.append(i * Time_unit)
            
@@ -359,7 +359,7 @@ class Cortex():
             self.memb = None
         
         self.h_max = 1. #maximum cortex thickness (for constraining fit)
-        self.i_c_max = 500. #maximum cortex intensity (for constraining fit)
+        self.i_c_max = 5 * (self.actin.i.max()) #maximum cortex intensity (for constraining fit)
         self.h = None #cortex thickness (from fit)
         self.i_c = None #cortical actin intensity (from fit)
         self.density = None #cortical actin density
@@ -410,6 +410,7 @@ class Cortex():
                 actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
                 self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
                 self.X_c = self.memb.x_peak - self.h / 2.
+                
 
     def residuals(self,p):
         """Calculates residuals for cortex linescan fit to extract cortex
