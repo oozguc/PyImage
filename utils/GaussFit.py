@@ -96,6 +96,9 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
            
     return Thickness, Time      
 
+    
+    
+    
 def fit_func(x, a, sigma, mu, c ):
     """Definition of gaussian function used to fit linescan peaks.
     p = [a, sigma, mu, c].
@@ -358,7 +361,7 @@ class Cortex():
             self.actin = None
             self.memb = None
         
-        self.h_max = 1. #maximum cortex thickness (for constraining fit)
+        self.h_max = 5 * self.delta #maximum cortex thickness (for constraining fit)
         self.i_c_max = 5 * (self.actin.i.max()) #maximum cortex intensity (for constraining fit)
         self.h = None #cortex thickness (from fit)
         self.i_c = None #cortical actin intensity (from fit)
@@ -411,7 +414,7 @@ class Cortex():
                 self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
                 self.X_c = self.memb.x_peak - self.h / 2.
                 
-
+    
     def residuals(self,p):
         """Calculates residuals for cortex linescan fit to extract cortex
         thickness and intensity values
