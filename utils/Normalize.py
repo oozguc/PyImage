@@ -52,6 +52,39 @@ def save_tiff_imagej_compatible(file, img, axes, **imsave_kwargs):
 
     imsave_kwargs['imagej'] = True
     imsave(file, img, **imsave_kwargs)
+    
+def save_tiff_imagej_compatible16Bit(file, img, axes, **imsave_kwargs):
+    """Save image in ImageJ-compatible TIFF format.
+
+    Parameters
+    ----------
+    file : str
+        File name
+    img : numpy.ndarray
+        Image
+    axes: str
+        Axes of ``img``
+    imsave_kwargs : dict, optional
+        Keyword arguments for :func:`tifffile.imsave`
+
+    """
+    axes = axes_check_and_normalize(axes,img.ndim,disallowed='S')
+
+    # convert to imagej-compatible data type
+   
+    t = img.dtype
+    t_new = np.float32
+   
+    img = img.astype(t_new, copy=False)
+    if t != t_new:
+        warnings.warn("Converting data type from '%s' to ImageJ-compatible '%s'." % (t, np.dtype(t_new)))
+
+    # move axes to correct positions for imagej
+        img = move_image_axes(img, axes, 'TZCYX', True)
+
+    imsave_kwargs['imagej'] = True
+    imsave(file, img, **imsave_kwargs)    
+    
 def _fill_label_holes(lbl_img, **kwargs):
     lbl_img_filled = np.zeros_like(lbl_img)
     for l in (set(np.unique(lbl_img)) - set([0])):
@@ -81,43 +114,51 @@ def normalizeMinMax(x, mi, ma,axis = None, clip = False, dtype = np.float32):
         """ Normalizing an image between min and max """
         min = np.amin(x)
         max = np.amax(x)
-        #try: 
-            #import numexpr
+        try: 
+            import numexpr
             
-            #x = numexpr.evaluate("mi + ((x - min ) / (max - min))*ma")
-            #except ImportError:
-        x = mi + ((x - min ) / (max - min)) * ma
+            x = numexpr.evaluate("mi + ((x - min ) / (max - min))*ma")
+        except ImportError:
+            x = mi + ((x - min ) / (max - min)) * ma
         if clip:
                x = np.clip(x, 0 , 1)
         
         return x 
+def normalizeFloat(x, pmin=3, pmax=99.8, axis=None, clip=False, eps=1e-20, dtype=np.float32):
+    """Percentile-based image normalization."""
 
-def normalizeFloat(x, pmin = 3, pmax = 99.8, axis = None, clip = False, eps = 1e-20, dtype = np.float32):
-    """Percentile based Normalization"""
-    mi = np.percentile(x, pmin, axis = axis, keepdims = True)
-    ma = np.percentile(x, pmax, axis = axis, keepdims = True)
-    return normalize_mi_ma(x, mi, ma, clip = clip, eps = eps, dtype = dtype)
+    mi = np.percentile(x,pmin,axis=axis,keepdims=True)
+    ma = np.percentile(x,pmax,axis=axis,keepdims=True)
+    return normalize_mi_ma(x, mi, ma, clip=clip, eps=eps, dtype=dtype)
 
 
-def normalize_mi_ma(x, mi , ma, clip = False, eps = 1e-20, dtype = np.float32):
-    
+def normalize_mi_ma(x, mi, ma, clip=False, eps=1e-20, dtype=np.float32):
     if dtype is not None:
-        x = x.astype(dtype, copy = False)
-        mi = dtype(mi) if np.isscalar(mi) else mi.astype(dtype, copy = False)
-        ma = dtype(ma) if np.isscalar(ma) else ma.astype(dtype, copy = False)
+        x   = x.astype(dtype,copy=False)
+        mi  = dtype(mi) if np.isscalar(mi) else mi.astype(dtype,copy=False)
+        ma  = dtype(ma) if np.isscalar(ma) else ma.astype(dtype,copy=False)
         eps = dtype(eps)
-        
-    try: 
-        import numexpr
-        x = numexpr.evaluate("(x - mi ) / (ma - mi + eps)")
-    except ImportError:
-        x = (x - mi) / (ma - mi + eps)
-        
-    if clip:
 
-        x = np.clip(x, 0 , 1)
+    try:
+        import numexpr
+        x = numexpr.evaluate("(x - mi) / ( ma - mi + eps )")
+    except ImportError:
+        x =                   (x - mi) / ( ma - mi + eps )
+
+    if clip:
+        x = np.clip(x,0,1)
+
+    return x
+
+def removeBright(x, pmax = 99, pmin = 3):
+    
+    x[x > pmax * np.amax(x)] = 0
+    x[x < pmin * np.amin(x)] = 0
+    
         
-    return x   
+    return x    
+    
+  
 
 def axes_check_and_normalize(axes,length=None,disallowed=None,return_allowed=False):
     """
