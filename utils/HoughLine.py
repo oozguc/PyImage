@@ -1,5 +1,5 @@
 import numpy as np
-import imageio
+
 import math
 from skimage.transform import (hough_line, hough_line_peaks,
                                probabilistic_hough_line)
