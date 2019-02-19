@@ -54,7 +54,7 @@ from scipy.optimize import minimize
 import scipy
 
 import pylab
-def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, FitaroundOutside, psf, inisigmaguess):
+def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, FitaroundOutside, psf, inisigmaguess, showaftertime):
     
     Thickness = []
     Time = []
@@ -86,7 +86,7 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
         CortexThickness = Cortex(GaussFit,membraneimageGaussFit,psf,ch_actin=1)  
         CortexThickness.get_h_i_c()
         if CortexThickness.h is not None :
-            if i%10==0:
+            if i%showaftertime==0:
                print('Time point:', i) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
