@@ -114,12 +114,8 @@ def normalizeMinMax(x, mi, ma,axis = None, clip = False, dtype = np.float32):
         """ Normalizing an image between min and max """
         min = np.amin(x)
         max = np.amax(x)
-        try: 
-            import numexpr
-            
-            x = numexpr.evaluate("mi + ((x - min ) / (max - min))*ma")
-        except ImportError:
-            x = mi + ((x - min ) / (max - min)) * ma
+      
+        x = mi + ((x - min ) / (max - min)) * ma
         if clip:
                x = np.clip(x, 0 , 1)
         
