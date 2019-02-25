@@ -79,7 +79,7 @@ def PhaseStrip(imageA):
 
 def sumProjection(image):
     sumPro = 0
-    time = range(0, image.shape[0])
+    time = range(0, image.shape[1])
     time = np.asarray(time)
     for i in range(image.shape[0]):
         strip = image[i,:]
@@ -89,11 +89,11 @@ def sumProjection(image):
     return [sumPro, time]
 
 def maxProjection(image):
-    time = range(0, image.shape[0])
+    time = range(0, image.shape[1])
     time = np.asarray(time)
          
 
-    return [np.amax(image, axis = 1), time]
+    return [np.amax(image, axis = 0), time]
     
 #FFT along a strip
 def doFilterFFT(image,Time_unit, filter):
