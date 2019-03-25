@@ -5,7 +5,7 @@ from scipy.fftpack import fft, ifft, fftshift
 from scipy.fftpack import fftfreq
 import numpy as np
 from scipy.signal import find_peaks
-
+from numpy import mean, sqrt, square
 
 def show_peak(onedimg, frequ, veto_frequ):
 
@@ -46,7 +46,17 @@ def CrossCorrelationStrip(imageA, imageB):
     return PointsSample, x  
 
 
-    
+  
+def RMSStrip(imageA):
+    rmstotal = np.empty(imageA.shape[0])
+    PointsSample = imageA.shape[1]
+    peri = range(0, imageA.shape[0])
+    for i in range(imageA.shape[0] - 1):
+        stripA = imageA[i,:]
+        RMS = sqrt(mean(square(stripA)))
+        rmstotal[i] = RMS
+        
+    return [rmstotal, peri]    
 
 def FFTStrip(imageA):
     ffttotal = np.empty(imageA.shape)
