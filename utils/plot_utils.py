@@ -49,10 +49,10 @@ def overlaymultiplotXSave(plotA, plotB, x, titleA, titleB, targetdir = None, Fil
 def overlaymultiplotX(plotA, plotB, x, titleA, titleB, targetdir = None, File = None):
     fig, ax1 = plt.subplots()
     t = np.arange(0.01, 10.0, 0.01)
-    ax1.plot(x,plotA, 'b-', linestyle = 'solid')
+    ax1.plot(x,plotA, color = 'grey', linestyle = 'solid')
     
     # Make the y-axis label, ticks and tick labels match the line color.
-    ax1.set_ylabel(titleA, color='b')
+    ax1.set_ylabel(titleA, color='grey')
     
 
     ax2 = ax1.twinx()
