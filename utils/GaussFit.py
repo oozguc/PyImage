@@ -54,7 +54,8 @@ from scipy.optimize import minimize
 import scipy
 
 import pylab
-def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, FitaroundOutside, psf, inisigmaguess, showaftertime):
+def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside
+             , FitaroundOutside, psf, inisigmaguess, showaftertime):
     
     Thickness = []
     Time = []
@@ -92,7 +93,9 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside, Fit
                CortexThickness.plot_fits()
             if math.isnan(CortexThickness.h) == False and CortexThickness.h > 0:
              Thickness.append((CortexThickness.h))
-             Time.append(i * Time_unit)
+            else:
+             Thickness.append(0)
+            Time.append(i * Time_unit)
            
     return Thickness, Time      
 
@@ -220,7 +223,7 @@ class Linescan():
 
         #picks reasonable starting values for fit
         self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.FitaroundOutside/2)])
-        a = (self.i[self.max_idx] - self.i_in_guess) / 2.4
+        a = (self.i[self.max_idx] - self.i_in_guess) * 2
         sigma = self.inisigmaguess
         mu = self.x[self.max_idx]
         b = self.i_in_guess
@@ -317,7 +320,7 @@ class Linescan():
         self.right_index = (np.abs(search - hm)).argmin() + self.max_idx
         if hm < self.i[self.right_index]:
             self.right_index_left = deepcopy(self.right_index)
-            self.right_index_right = self.right_index_left + 1
+            self.right_index_right = self.right_index_left 
         else:
             self.right_index_right = deepcopy(self.right_index)
             self.right_index_left = self.right_index_right - 1
