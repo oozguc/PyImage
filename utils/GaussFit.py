@@ -54,8 +54,8 @@ from scipy.optimize import minimize
 import scipy
 
 import pylab
-def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside
-             , FitaroundOutside, psf, inisigmaguess, showaftertime):
+def StripFit(image, membraneimage, Time_unit, Xcalibration, Fitaround
+             , psf, inisigmaguess, showaftertime):
     
     Thickness = []
     Time = []
@@ -65,8 +65,8 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside
         I = []
         membraneimageX = []
         membraneimageI = []
-        strip = image[2:image.shape[0]-2,i]
-        membraneimagestrip = membraneimage[2:membraneimage.shape[0]-2,i]
+        strip = image[:image.shape[0],i]
+        membraneimagestrip = membraneimage[:membraneimage.shape[0],i]
         for j in range(strip.shape[0]):
            X.append(j * Xcalibration)
            I.append(strip[j])
@@ -76,10 +76,10 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, FitaroundInside
            membraneimageI.append(membraneimagestrip[j]) 
            
         
-        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, FitaroundInside, FitaroundOutside, inisigmaguess)
+        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround, inisigmaguess)
        
         
-        GaussFit = Linescan(X,I, FitaroundInside, FitaroundOutside, inisigmaguess)
+        GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
        
         
         
@@ -156,7 +156,7 @@ class Linescan():
     from linescans.
     """
 
-    def __init__(self,x,i, FitaroundInside, FitaroundOutside,inisigmaguess):
+    def __init__(self,x,i, Fitaround, inisigmaguess):
         """Initializes linescan.
         Args:
             x (list of numbers): the position values
@@ -169,8 +169,8 @@ class Linescan():
         #detminere a few easy parameters from position/intensity
         self.H = self.x[-1] - self.x[0]
         self.i_tot = np.trapz(self.i,self.x)
-        self.FitaroundInside = FitaroundInside
-        self.FitaroundOutside = FitaroundOutside
+        self.Fitaround = Fitaround
+        
         #populate other attributes
         self.dist_to_x_in_out = 1. #specifies how far away x_in is from the peak (in um)
         self.gauss_params = None #parameter list from Gaussian fit to find peak
@@ -217,13 +217,13 @@ class Linescan():
         """
         length = len(self.i)
         #restricts fitting to near the center of the linescan
-        self.max_idx = np.argmax(self.i[int(length/2- self.FitaroundInside):int(length/2+ self.FitaroundOutside)]) + int(length/2-self.FitaroundInside)
-        self.x_fit = self.x[self.max_idx-2:self.max_idx+2]
-        self.i_fit = self.i[self.max_idx-2:self.max_idx+2]
+        self.max_idx = np.argmax(self.i[int(length/2- self.Fitaround):int(length/2+ self.Fitaround)])+ int(length/2)- self.Fitaround 
+        self.x_fit = self.x[self.max_idx-int(self.Fitaround/2):self.max_idx+int(self.Fitaround/2)]
+        self.i_fit = self.i[self.max_idx-int(self.Fitaround/2):self.max_idx+int(self.Fitaround/2)]
 
         #picks reasonable starting values for fit
-        self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.FitaroundOutside/2)])
-        a = (self.i[self.max_idx] - self.i_in_guess) * 2
+        self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.Fitaround * 2)])
+        a = (self.i[self.max_idx] - self.i_in_guess)/ 2.4
         sigma = self.inisigmaguess
         mu = self.x[self.max_idx]
         b = self.i_in_guess
@@ -320,7 +320,7 @@ class Linescan():
         self.right_index = (np.abs(search - hm)).argmin() + self.max_idx
         if hm < self.i[self.right_index]:
             self.right_index_left = deepcopy(self.right_index)
-            self.right_index_right = self.right_index_left 
+            self.right_index_right = self.right_index_left - 1
         else:
             self.right_index_right = deepcopy(self.right_index)
             self.right_index_left = self.right_index_right - 1
@@ -390,8 +390,8 @@ class Cortex():
 
                     i_c_start = self.actin.i_peak * i_c_factor
                     delta_start = ((self.sigma_actin**2 / delta*2) *
-                                   np.log((self.actin.i_out - i_c_start) /
-                                          (self.actin.i_in - i_c_start)))
+                                   np.log(((self.actin.i_out - i_c_start) /
+                                          (self.actin.i_in - i_c_start  ))))
                     h_start = 2 * (delta - delta_start) * h_factor
 
                     #performs fit
