@@ -54,7 +54,7 @@ from scipy.optimize import minimize
 import scipy
 
 import pylab
-def StripFit(image, membraneimage, Time_unit, Xcalibration, Fitaround
+def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime):
     
     Thickness = []
@@ -84,18 +84,19 @@ def StripFit(image, membraneimage, Time_unit, Xcalibration, Fitaround
         
         
         
-        CortexThickness = Cortex(GaussFit,membraneimageGaussFit,psf,ch_actin=1)  
+        CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf,ch_actin=2)  
         CortexThickness.get_h_i_c()
         if CortexThickness.h is not None :
             if i%showaftertime==0:
                print('Time point:', i) 
+               print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
+               print("Actin Fit:", GaussFit.gauss_params ) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
             if math.isnan(CortexThickness.h) == False and CortexThickness.h > 0:
              Thickness.append((CortexThickness.h))
-            else:
-             Thickness.append(0)
-            Time.append(i * Time_unit)
+            
+             Time.append(i * Time_unit)
            
     return Thickness, Time      
 
@@ -218,12 +219,12 @@ class Linescan():
         length = len(self.i)
         #restricts fitting to near the center of the linescan
         self.max_idx = np.argmax(self.i[int(length/2- self.Fitaround):int(length/2+ self.Fitaround)])+ int(length/2)- self.Fitaround 
-        self.x_fit = self.x[self.max_idx-int(self.Fitaround/2):self.max_idx+int(self.Fitaround/2)]
-        self.i_fit = self.i[self.max_idx-int(self.Fitaround/2):self.max_idx+int(self.Fitaround/2)]
+        self.x_fit = self.x[self.max_idx-int(self.Fitaround):self.max_idx+int(self.Fitaround)]
+        self.i_fit = self.i[self.max_idx-int(self.Fitaround):self.max_idx+int(self.Fitaround)]
 
         #picks reasonable starting values for fit
-        self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.Fitaround * 2)])
-        a = (self.i[self.max_idx] - self.i_in_guess)/ 2.4
+        self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.Fitaround )])
+        a = (self.i[self.max_idx] - self.i_in_guess)/ 2
         sigma = self.inisigmaguess
         mu = self.x[self.max_idx]
         b = self.i_in_guess
@@ -385,15 +386,15 @@ class Cortex():
                 (self.actin.i_in - self.actin.i_peak))>=0:
 
             #loops through several different starting values for i_c and h
-            for i_c_factor in np.arange(2.,3.1,0.2):
-                for h_factor in np.arange(0.5, 2.1, 0.2):
+            for i_c_factor in np.arange(2,3.1,0.5):
+                for h_factor in np.arange(0.5, 2.1, 0.5):
 
                     i_c_start = self.actin.i_peak * i_c_factor
                     delta_start = ((self.sigma_actin**2 / delta*2) *
                                    np.log(((self.actin.i_out - i_c_start) /
                                           (self.actin.i_in - i_c_start  ))))
-                    h_start = 2 * (delta - delta_start) * h_factor
-
+                    h_start = 2 * (delta - delta_start ) * h_factor
+                    
                     #performs fit
                     p0 = [h_start, i_c_start]
 
@@ -458,8 +459,8 @@ class Cortex():
         ax = fig.add_subplot(1,1,1)
 
         #plots raw data
-        pylab.plot(self.ch1.x,self.ch1.i,'g',label="Ch. 1")
-        pylab.plot(self.ch2.x,self.ch2.i,'r',label="Ch. 2")
+        pylab.plot(self.ch1.x,self.ch1.i,'r',label="Ch. 1")
+        pylab.plot(self.ch2.x,self.ch2.i,'g',label="Ch. 2")
 
         #plots points used for determining i_in and i_out
         pylab.plot(self.ch1.i_in_x_list,self.ch1.i_in_i_list,'yo',label=r"$i_{\rm{in}}$, $i_{\rm{out}}$")
@@ -523,8 +524,8 @@ class Cortex():
             color_actin = 'g'
             color_memb = 'r'
         elif self.ch_actin==2 or self.ch_actin=="2":
-            color_actin = 'r'
-            color_memb = 'g'
+            color_actin = 'g'
+            color_memb = 'r'
         else:
             raise ValueError("Please specify ch_actin as <<1>>, <<2>> for plotting fit!")
 
