@@ -58,6 +58,7 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime):
     
     Thickness = []
+    PeakDiffArray = []
     Time = []
     assert(image.shape == membraneimage.shape)
     for i in range(image.shape[1]):
@@ -84,10 +85,11 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
         
         
         
-        CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf,ch_actin=2)  
+        CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf)  
         CortexThickness.get_h_i_c()
         PeakActin = GaussFit.gauss_params[2]
         PeakMembrane = membraneimageGaussFit.gauss_params[2]
+        PeakDiff = PeakActin - PeakMembrane 
         if CortexThickness.h is not None :
             if i%showaftertime==0:
                print('Time point:', i) 
@@ -95,12 +97,15 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
                print("Actin Fit:", GaussFit.gauss_params ) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
+               print("Thickness, center position of the cortical actin , cortical actin intensity (from fit)",CortexThickness.h, CortexThickness.X_c, CortexThickness.i_c) 
             if math.isnan(CortexThickness.h) == False and CortexThickness.h > 0:
-             Thickness.append((CortexThickness.h))
+               
+             Thickness.append((CortexThickness.h)) 
+             PeakDiffArray.append(PeakDiff)
             
              Time.append(i * Time_unit)
            
-    return PeakMembrane,PeakActin,Thickness, Time      
+    return PeakDiffArray,Thickness, Time      
 
     
     
@@ -341,7 +346,7 @@ class Cortex():
     """A Class for a cortex, with actin and membrane linescans and
      methods to determine cortex thickness and density.
     """
-    def __init__(self,ch1,ch2,sigma_actin,ch_actin=1):
+    def __init__(self,ch1,ch2,sigma_actin,ch_actin=2):
         """Initializes linescan pairs and remaining attributes.
             Args:
                 ch1 (Linescan class): the ch1 linescan
@@ -355,17 +360,12 @@ class Cortex():
         self.sigma_actin = sigma_actin
         self.ch_actin = ch_actin
 
-        self.delta = self.ch2.x_peak - self.ch1.x_peak #separation between ch2 and ch1 peaks
+        self.delta = self.ch2.gauss_params[2] - self.ch1.gauss_params[2] #separation between ch2 and ch1 peaks
 
-        if self.ch_actin==1:
-            self.actin = self.ch1
-            self.memb = self.ch2
-        elif self.ch_actin==2:
-            self.actin = self.ch2
-            self.memb = self.ch1
-        else:
-            self.actin = None
-            self.memb = None
+    
+        self.actin = self.ch2
+        self.memb = self.ch1
+
         
         self.h_max = 5 * self.delta #maximum cortex thickness (for constraining fit)
         self.i_c_max = 5 * (self.actin.i.max()) #maximum cortex intensity (for constraining fit)
@@ -379,7 +379,7 @@ class Cortex():
        
 
           delta = abs(self.delta)
-        
+          
           #SET STARTING VALUES FOR ROOTS AND SOLUTIONS
           self.solution = 2e+20
 
@@ -388,21 +388,21 @@ class Cortex():
                 (self.actin.i_in - self.actin.i_peak))>=0:
 
             #loops through several different starting values for i_c and h
-            for i_c_factor in np.arange(2,3.1,0.5):
-                for h_factor in np.arange(0.5, 2.1, 0.5):
+            for i_c_factor in np.arange(1,30.1,5):
+                for h_factor in np.arange(1, 30.1,5):
 
                     i_c_start = self.actin.i_peak * i_c_factor
                     delta_start = ((self.sigma_actin**2 / delta*2) *
                                    np.log(((self.actin.i_out - i_c_start) /
                                           (self.actin.i_in - i_c_start  ))))
                     h_start = 2 * (delta - delta_start ) * h_factor
-                    
+                    #print(delta, delta_start, h_start, i_c_start)
                     #performs fit
                     p0 = [h_start, i_c_start]
 
                     try:
                         result = optimize.leastsq(self.residuals, p0,
-                                                  maxfev=100000, full_output=1)
+                                                  maxfev=100, full_output=1)
 
                         solution_temp = np.sum([x**2 for x in result[2]['fvec']])
 
@@ -485,8 +485,8 @@ class Cortex():
         x_fwhm1, i_fwhm1 = zip(self.ch1.fwhm_left,self.ch1.fwhm_right)
         x_fwhm2, i_fwhm2 = zip(self.ch2.fwhm_left,self.ch2.fwhm_right)
 
-        pylab.plot(x_fwhm1, i_fwhm1,'g',ls='-',marker='x',label="fwhm")
-        pylab.plot(x_fwhm2, i_fwhm2,'r',ls='-',marker='x',label='fwhm')
+        pylab.plot(x_fwhm1, i_fwhm1,'r',ls='-',marker='x',label="fwhm")
+        pylab.plot(x_fwhm2, i_fwhm2,'g',ls='-',marker='x',label='fwhm')
 
         # x_fwhm1 = [self.ch1.x[self.ch1.left_index],self.ch1.x[self.ch1.right_index]]
         # y_fwhm1 = (self.ch1.i[self.ch1.left_index] + self.ch1.i[self.ch1.right_index]) / 2.
