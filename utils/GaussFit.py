@@ -86,6 +86,8 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
         
         CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf,ch_actin=2)  
         CortexThickness.get_h_i_c()
+        PeakActin = GaussFit.gauss_params[2]
+        PeakMembrane = membraneimageGaussFit.gauss_params[2]
         if CortexThickness.h is not None :
             if i%showaftertime==0:
                print('Time point:', i) 
@@ -98,7 +100,7 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
             
              Time.append(i * Time_unit)
            
-    return Thickness, Time      
+    return PeakMembrane,PeakActin,Thickness, Time      
 
     
     
