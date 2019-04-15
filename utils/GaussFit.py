@@ -105,7 +105,7 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
             
              Time.append(i * Time_unit)
            
-    return PeakDiffArray,Thickness, Time      
+    return Thickness, Time      
 
     
     
@@ -226,8 +226,8 @@ class Linescan():
         length = len(self.i)
         #restricts fitting to near the center of the linescan
         self.max_idx = np.argmax(self.i[int(length/2- self.Fitaround):int(length/2+ self.Fitaround)])+ int(length/2)- self.Fitaround 
-        self.x_fit = self.x[self.max_idx-int(self.Fitaround):self.max_idx+int(self.Fitaround)]
-        self.i_fit = self.i[self.max_idx-int(self.Fitaround):self.max_idx+int(self.Fitaround)]
+        self.x_fit = self.x[self.max_idx-int(self.Fitaround/2):self.max_idx+int(self.Fitaround/2)+1]
+        self.i_fit = self.i[self.max_idx-int(self.Fitaround/2):self.max_idx+int(self.Fitaround/2)+1]
 
         #picks reasonable starting values for fit
         self.i_in_guess = np.mean(self.i[:int(self.max_idx-self.Fitaround )])
@@ -360,15 +360,15 @@ class Cortex():
         self.sigma_actin = sigma_actin
         self.ch_actin = ch_actin
 
-        self.delta = self.ch1.gauss_params[2] - self.ch2.gauss_params[2] #separation between ch2 and ch1 peaks
+        self.delta = self.ch2.gauss_params[2] - self.ch1.gauss_params[2] #separation between ch2 and ch1 peaks
 
     
         self.actin = self.ch2
         self.memb = self.ch1
 
         
-        self.h_max = 5 * self.delta #maximum cortex thickness (for constraining fit)
-        self.i_c_max = 5 * (self.actin.i.max()) #maximum cortex intensity (for constraining fit)
+        self.h_max = 2 * self.delta #maximum cortex thickness (for constraining fit)
+        self.i_c_max = 2 * (self.actin.i.max()) #maximum cortex intensity (for constraining fit)
         self.h = None #cortex thickness (from fit)
         self.i_c = None #cortical actin intensity (from fit)
         self.density = None #cortical actin density
@@ -378,7 +378,7 @@ class Cortex():
     def get_h_i_c(self):
        
 
-          delta = abs(self.delta)
+          delta = (self.delta)
           
           #SET STARTING VALUES FOR ROOTS AND SOLUTIONS
           self.solution = 2e+20
@@ -388,8 +388,8 @@ class Cortex():
                 (self.actin.i_in - self.actin.i_peak))>=0:
 
             #loops through several different starting values for i_c and h
-            for i_c_factor in np.arange(1,30.1,5):
-                for h_factor in np.arange(1, 30.1,5):
+            for i_c_factor in np.arange(1,5.1,0.5):
+                for h_factor in np.arange(1, 5.1,0.5):
 
                     i_c_start = self.actin.i_peak * i_c_factor
                     delta_start = ((self.sigma_actin**2 / delta*2) *
@@ -418,7 +418,7 @@ class Cortex():
                 self.h, self.i_c = p1
                 actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
                 self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
-                self.X_c = self.memb.x_peak - self.h / 2.
+                self.X_c = self.memb.x_peak + self.h / 2.
                 
     
     def residuals(self,p):
@@ -442,7 +442,7 @@ class Cortex():
 
             #X_c is the position of the center of the cortex
             #x_c is the position of the cortex peak
-            X_c_try = self.memb.x_peak - p[0] / 2.
+            X_c_try = self.memb.x_peak + p[0] / 2.
             delta_try = (self.sigma_actin**2 / p[0]) * np.log((self.actin.i_out - p[1]) / (self.actin.i_in - p[1]))
             x_c_try = X_c_try - delta_try
             i_peak_try = convolved([self.actin.i_in, p[1], self.actin.i_out, p[0], X_c_try, self.sigma_actin], x_c_try)
@@ -509,12 +509,15 @@ class Cortex():
 
         #finish plot
         y_min, y_max = ax.get_ylim()
-        pylab.ylim = (0,y_max)
-
+        
+        pylab.ylim = (y_max/2,y_max)
+        x_min, x_max = ax.get_xlim()
+        #pylab.axis([x_max/2-2,x_max-1, y_max/2, y_max])
         pylab.xlabel("Position ($\mu$m)")
         pylab.ylabel("Intensity (AU)")
         pylab.legend(loc='upper right')
         pylab.gcf().subplots_adjust(bottom=0.15)
+        
         pylab.show()
     def plot_fits(self):
         """Plots linescan pair with fitted cortex thickness"""
@@ -544,15 +547,16 @@ class Cortex():
                                    self.actin.i_out, self.h, self.X_c, self.sigma_actin],
                                   x_actin_hd)
 
-        pylab.plot(x_actin_hd,i_actin_unconv,ls='-',color=color_actin, label='fit')
-        pylab.plot(x_actin_hd,i_actin_conv,ls='--',color=color_actin, label='fit (conv.)')
+        pylab.plot(x_actin_hd,i_actin_unconv,ls='-',color=color_actin)
+        pylab.plot(x_actin_hd,i_actin_conv,ls='--',color=color_actin)
 
-        pylab.axvline(x=self.memb.x_peak, color=color_memb, ls='--', label="Memb. (peak)")
+        pylab.axvline(x=self.memb.x_peak, color=color_memb, ls='--')
 
         #finishes plot
         y_min, y_max = ax.get_ylim()
-        pylab.ylim = (0,y_max)
-
+        pylab.ylim = (y_max/2,y_max)
+        x_min, x_max = ax.get_xlim()
+        #pylab.axis([x_max/2-2,x_max-1, y_max/2, y_max])
         pylab.xlabel("Position ($\mu$m)")
         pylab.ylabel("Intensity (AU)")
         pylab.legend(loc='upper right')
