@@ -328,7 +328,7 @@ class Linescan():
         self.right_index = (np.abs(search - hm)).argmin() + self.max_idx
         if hm < self.i[self.right_index]:
             self.right_index_left = deepcopy(self.right_index)
-            self.right_index_right = self.right_index_left - 1
+            self.right_index_right = self.right_index_left + 1
         else:
             self.right_index_right = deepcopy(self.right_index)
             self.right_index_left = self.right_index_right - 1
@@ -388,8 +388,8 @@ class Cortex():
                 (self.actin.i_in - self.actin.i_peak))>=0:
 
             #loops through several different starting values for i_c and h
-            for i_c_factor in np.arange(1,5.1,0.5):
-                for h_factor in np.arange(1, 5.1,0.5):
+            for i_c_factor in np.arange(0.5,1.5,0.5):
+                for h_factor in np.arange(0.5,1.5,0.5):
 
                     i_c_start = self.actin.i_peak * i_c_factor
                     delta_start = ((self.sigma_actin**2 / delta*2) *
