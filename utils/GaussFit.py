@@ -85,7 +85,7 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
         
         
         
-        CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf)  
+        CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf, 2)  
         CortexThickness.get_h_i_c()
         PeakActin = GaussFit.gauss_params[2]
         PeakMembrane = membraneimageGaussFit.gauss_params[2]
@@ -360,7 +360,7 @@ class Cortex():
         self.sigma_actin = sigma_actin
         self.ch_actin = ch_actin
 
-        self.delta = self.ch2.gauss_params[2] - self.ch1.gauss_params[2] #separation between ch2 and ch1 peaks
+        self.delta = self.ch1.gauss_params[2] - self.ch2.gauss_params[2] #separation between ch2 and ch1 peaks
 
     
         self.actin = self.ch2
