@@ -367,8 +367,8 @@ class Cortex():
         self.memb = self.ch1
 
         
-        self.h_max = 2 * self.delta #maximum cortex thickness (for constraining fit)
-        self.i_c_max = 2 * (self.actin.i.max()) #maximum cortex intensity (for constraining fit)
+        self.h_max = 5* self.delta #maximum cortex thickness (for constraining fit)
+        self.i_c_max = 5* (self.actin.i.max()) #maximum cortex intensity (for constraining fit)
         self.h = None #cortex thickness (from fit)
         self.i_c = None #cortical actin intensity (from fit)
         self.density = None #cortical actin density
@@ -388,8 +388,8 @@ class Cortex():
                 (self.actin.i_in - self.actin.i_peak))>=0:
 
             #loops through several different starting values for i_c and h
-            for i_c_factor in np.arange(0.5,1.5,0.5):
-                for h_factor in np.arange(0.5,1.5,0.5):
+            for i_c_factor in np.arange(0.5,2.5,0.5):
+                for h_factor in np.arange(0.5,2.5,0.5):
 
                     i_c_start = self.actin.i_peak * i_c_factor
                     delta_start = ((self.sigma_actin**2 / delta*2) *
@@ -442,7 +442,7 @@ class Cortex():
 
             #X_c is the position of the center of the cortex
             #x_c is the position of the cortex peak
-            X_c_try = self.memb.x_peak + p[0] / 2.
+            X_c_try = self.actin.x_peak - p[0] / 2.
             delta_try = (self.sigma_actin**2 / p[0]) * np.log((self.actin.i_out - p[1]) / (self.actin.i_in - p[1]))
             x_c_try = X_c_try - delta_try
             i_peak_try = convolved([self.actin.i_in, p[1], self.actin.i_out, p[0], X_c_try, self.sigma_actin], x_c_try)
