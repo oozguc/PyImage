@@ -48,12 +48,14 @@ def show_poly_regression(X, Y, degree = 2):
 def rgb2gray(rgb):
     return np.dot(rgb[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
 
-def show_plot(points, Xrange = 100):
+def show_plot(points,  ymin, ymax):
 
     
     fig, ax = plt.subplots() 
     ax.plot(points[:, 0], points[: , 1], '.b', alpha=0.6,
         label='Inlier data')
+    x_min, x_max = ax.get_xlim()
+    ax.axis([x_min,x_max, ymin, ymax])
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('Thickness (um)')
     plt.show()

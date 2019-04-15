@@ -57,9 +57,9 @@ import pylab
 
 def MakePath(targetdir):
     
-    
-    if not Path(targetdir).is_dir():
-        targetdir.mkdir(parents=True,exist_ok=True)
+    p = Path(targetdir)
+    if not p.is_dir():
+        p.mkdir(parents=True,exist_ok=True)
     
     
         
