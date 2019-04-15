@@ -97,10 +97,10 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
                print("Actin Fit:", GaussFit.gauss_params ) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
-               print("Thickness, center position of the cortical actin , cortical actin intensity (from fit)",CortexThickness.h, CortexThickness.X_c, CortexThickness.i_c) 
-            if math.isnan(CortexThickness.h) == False and CortexThickness.h > 0:
+               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), np.round(CortexThickness.X_c), np.round(CortexThickness.i_c))
+            if math.isnan(CortexThickness.h) == False:
                
-             Thickness.append((CortexThickness.h)) 
+             Thickness.append(abs(CortexThickness.h)) 
              PeakDiffArray.append(PeakDiff)
             
              Time.append(i * Time_unit)
@@ -312,7 +312,7 @@ class Linescan():
         self.left_index = (np.abs(search - hm)).argmin()
         if hm > self.i[self.left_index]:
             self.left_index_left = deepcopy(self.left_index)
-            self.left_index_right = self.left_index_left + 1
+            self.left_index_right = self.left_index_left
         else:
             self.left_index_right = deepcopy(self.left_index)
             self.left_index_left = self.left_index_right - 1
@@ -328,7 +328,7 @@ class Linescan():
         self.right_index = (np.abs(search - hm)).argmin() + self.max_idx
         if hm < self.i[self.right_index]:
             self.right_index_left = deepcopy(self.right_index)
-            self.right_index_right = self.right_index_left + 1
+            self.right_index_right = self.right_index_left 
         else:
             self.right_index_right = deepcopy(self.right_index)
             self.right_index_left = self.right_index_right - 1
@@ -360,7 +360,7 @@ class Cortex():
         self.sigma_actin = sigma_actin
         self.ch_actin = ch_actin
 
-        self.delta = self.ch2.gauss_params[2] - self.ch1.gauss_params[2] #separation between ch2 and ch1 peaks
+        self.delta = self.ch1.gauss_params[2] - self.ch2.gauss_params[2] #separation between ch2 and ch1 peaks
 
     
         self.actin = self.ch2
@@ -388,8 +388,8 @@ class Cortex():
                 (self.actin.i_in - self.actin.i_peak))>=0:
 
             #loops through several different starting values for i_c and h
-            for i_c_factor in np.arange(0.5,2.5,0.5):
-                for h_factor in np.arange(0.5,2.5,0.5):
+            for i_c_factor in np.arange(0.1,2.5,0.5):
+                for h_factor in np.arange(0.1,2.5,0.5):
 
                     i_c_start = self.actin.i_peak * i_c_factor
                     delta_start = ((self.sigma_actin**2 / delta*2) *
@@ -418,7 +418,7 @@ class Cortex():
                 self.h, self.i_c = p1
                 actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
                 self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
-                self.X_c = self.memb.x_peak + self.h / 2.
+                self.X_c = self.memb.x_peak + (self.h) / 2.
                 
     
     def residuals(self,p):
@@ -442,7 +442,7 @@ class Cortex():
 
             #X_c is the position of the center of the cortex
             #x_c is the position of the cortex peak
-            X_c_try = self.actin.x_peak - p[0] / 2.
+            X_c_try = self.memb.x_peak + p[0] / 2.
             delta_try = (self.sigma_actin**2 / p[0]) * np.log((self.actin.i_out - p[1]) / (self.actin.i_in - p[1]))
             x_c_try = X_c_try - delta_try
             i_peak_try = convolved([self.actin.i_in, p[1], self.actin.i_out, p[0], X_c_try, self.sigma_actin], x_c_try)
