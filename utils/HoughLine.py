@@ -48,43 +48,53 @@ def show_poly_regression(X, Y, degree = 2):
 def rgb2gray(rgb):
     return np.dot(rgb[..., :3], [0.299, 0.587, 0.114]).astype(np.uint8)
 
+def show_plot(points, Xrange = 100):
 
+    
+    fig, ax = plt.subplots() 
+    ax.plot(points[:, 0], points[: , 1], '.b', alpha=0.6,
+        label='Inlier data')
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Thickness (um)')
+    plt.show()
+    
 def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_trials=1000, Xrange = 100, displayoutlier= False):
    
     # fit line using all data
  model = LineModelND()
- model.estimate(points)
+ if(len(points) > 2):
+  model.estimate(points)
  
- fig, ax = plt.subplots()   
+  fig, ax = plt.subplots()   
 
- # robustly fit line only using inlier data with RANSAC algorithm
- model_robust, inliers = ransac(points, LineModelND, min_samples=min_samples,
+  # robustly fit line only using inlier data with RANSAC algorithm
+  model_robust, inliers = ransac(points, LineModelND, min_samples=min_samples,
                                residual_threshold=residual_threshold, max_trials=max_trials)
- slope , intercept = model_robust.params
+  slope , intercept = model_robust.params
  
- outliers = inliers == False
- # generate coordinates of estimated models
- line_x = np.arange(0, Xrange)
- line_y = model.predict_y(line_x)
- line_y_robust = model_robust.predict_y(line_x)
+  outliers = inliers == False
+  # generate coordinates of estimated models
+  line_x = np.arange(0, Xrange)
+  line_y = model.predict_y(line_x)
+  line_y_robust = model_robust.predict_y(line_x)
  
- #print('Model Fit' , 'yVal = ' , line_y_robust)
- #print('Model Fit', 'xVal = ' , line_x)
- ax.plot(points[inliers, 0], points[inliers, 1], '.b', alpha=0.6,
+  #print('Model Fit' , 'yVal = ' , line_y_robust)
+  #print('Model Fit', 'xVal = ' , line_x)
+  ax.plot(points[inliers, 0], points[inliers, 1], '.b', alpha=0.6,
         label='Inlier data')
- if displayoutlier:
-  ax.plot(points[outliers, 0], points[outliers, 1], '.r', alpha=0.6,
+  if displayoutlier:
+   ax.plot(points[outliers, 0], points[outliers, 1], '.r', alpha=0.6,
         label='Outlier data')
- #ax.plot(line_x, line_y, '-r', label='Normal line model')
- ax.plot(line_x, line_y_robust, '-g', label='Robust line model')
- ax.legend(loc='upper left')
+  #ax.plot(line_x, line_y, '-r', label='Normal line model')
+  ax.plot(line_x, line_y_robust, '-g', label='Robust line model')
+  ax.legend(loc='upper left')
    
- ax.set_xlabel('Time (s)')
- ax.set_ylabel('Thickness (um)')
- print('Ransac Slope = ', str('%.3e'%((line_y_robust[Xrange - 1] - line_y_robust[0])/ (Xrange)) )) 
- print('Regression Slope = ', str('%.3e'%((line_y[Xrange - 1] - line_y_robust[0])/ (Xrange)) )) 
- print('Mean Thickness (After outlier removal) = ', str('%.3f'%(sum(points[inliers, 1])/len(points[inliers, 1]))), 'um')   
- plt.show()
+  ax.set_xlabel('Time (s)')
+  ax.set_ylabel('Thickness (um)')
+  print('Ransac Slope = ', str('%.3e'%((line_y_robust[Xrange - 1] - line_y_robust[0])/ (Xrange)) )) 
+  print('Regression Slope = ', str('%.3e'%((line_y[Xrange - 1] - line_y_robust[0])/ (Xrange)) )) 
+  print('Mean Thickness (After outlier removal) = ', str('%.3f'%(sum(points[inliers, 1])/len(points[inliers, 1]))), 'um')   
+  plt.show()
  
     
     
@@ -110,7 +120,10 @@ def show_ransac_line(img, Xcalibration, Time_unit, maxlines, min_samples=2, resi
      x0 = np.arange(img.shape[1])   
  
      y0 =  model_robust.predict_y(x0)
- 
+     y_min, y_max = ax.get_ylim()
+     x_min, x_max = ax.get_xlim()
+     
+     ax.axis = ([x_min,x_max, y_max/2, y_max])
      plt.plot(x0, model_robust.predict_y(x0), '-r')
  
     ax.imshow(img)

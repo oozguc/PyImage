@@ -52,14 +52,25 @@ from copy import deepcopy
 from scipy.optimize import minimize
 
 import scipy
-
+from pathlib import Path
 import pylab
-def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime):
+
+def MakePath(targetdir):
     
-    Thickness = []
+    
+    if not Path(targetdir).is_dir():
+        targetdir.mkdir(parents=True,exist_ok=True)
+    
+    
+        
+    
+
+def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
+             , psf, inisigmaguess, showaftertime,Thickness, Time):
+    
+    
     PeakDiffArray = []
-    Time = []
+    
     assert(image.shape == membraneimage.shape)
     for i in range(image.shape[1]):
         X = []
@@ -101,9 +112,13 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
             if math.isnan(CortexThickness.h) == False:
                
              Thickness.append(abs(CortexThickness.h)) 
+                
              PeakDiffArray.append(PeakDiff)
             
-             Time.append(i * Time_unit)
+            else:
+                Thickness.append(0) 
+            
+            Time.append(i * Time_unit)
            
     return Thickness, Time      
 
@@ -402,7 +417,7 @@ class Cortex():
 
                     try:
                         result = optimize.leastsq(self.residuals, p0,
-                                                  maxfev=100, full_output=1)
+                                                  maxfev=10000, full_output=1)
 
                         solution_temp = np.sum([x**2 for x in result[2]['fvec']])
 
