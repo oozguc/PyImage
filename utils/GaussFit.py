@@ -108,7 +108,7 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
                print("Actin Fit:", GaussFit.gauss_params ) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
-               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), np.round(CortexThickness.X_c), np.round(CortexThickness.i_c))
+               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), (CortexThickness.X_c), (CortexThickness.i_c))
             if math.isnan(CortexThickness.h) == False:
                
              Thickness.append(abs(CortexThickness.h)) 
@@ -375,7 +375,7 @@ class Cortex():
         self.sigma_actin = sigma_actin
         self.ch_actin = ch_actin
 
-        self.delta = self.ch1.gauss_params[2] - self.ch2.gauss_params[2] #separation between ch2 and ch1 peaks
+        self.delta = self.ch2.gauss_params[2] - self.ch1.gauss_params[2] #separation between ch2 and ch1 peaks
 
     
         self.actin = self.ch2
@@ -393,7 +393,7 @@ class Cortex():
     def get_h_i_c(self):
        
 
-          delta = (self.delta)
+          delta = abs(self.delta)
           
           #SET STARTING VALUES FOR ROOTS AND SOLUTIONS
           self.solution = 2e+20
@@ -433,7 +433,7 @@ class Cortex():
                 self.h, self.i_c = p1
                 actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
                 self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
-                self.X_c = self.memb.x_peak + (self.h) / 2.
+                self.X_c = self.memb.x_peak + abs(self.h) / 2.
                 
     
     def residuals(self,p):
