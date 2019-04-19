@@ -64,6 +64,44 @@ def MakePath(targetdir):
     
         
     
+def ReadFit(X, I, membraneX, membraneI, Fitaround
+             , psf, inisigmaguess, showaftertime,Thickness, Time, i):
+    
+    
+        membraneimageGaussFit = Linescan(membraneX,membraneI, Fitaround, inisigmaguess)
+       
+        
+        GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
+       
+        
+        
+        
+        CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf, 2)  
+        CortexThickness.get_h_i_c()
+        PeakActin = GaussFit.gauss_params[2]
+        PeakMembrane = membraneimageGaussFit.gauss_params[2]
+        PeakDiff = PeakActin - PeakMembrane 
+        if CortexThickness.h is not None :
+            
+               
+               print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
+               print("Actin Fit:", GaussFit.gauss_params ) 
+               CortexThickness.plot_lss()
+               CortexThickness.plot_fits()
+               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), (CortexThickness.X_c), (CortexThickness.i_c))
+               if math.isnan(CortexThickness.h) == False:
+               
+                  Thickness.append(abs(CortexThickness.h)) 
+                
+                  
+            
+               else:
+                  Thickness.append(0) 
+            
+               Time.append(i)
+           
+        return Thickness, Time 
+
 
 def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime,Thickness, Time):
