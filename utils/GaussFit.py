@@ -82,11 +82,18 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
         for j in range(strip.shape[0]):
            X.append(j * Xcalibration)
            I.append(strip[j])
-            
+        
+        
+        X = np.asarray(X)
+        I = np.asarray(I)
         for j in range(membraneimagestrip.shape[0]):    
            membraneimageX.append(j * Xcalibration)
            membraneimageI.append(membraneimagestrip[j]) 
            
+        membraneimageX = np.asarray(membraneimageX)
+        membraneimageI = np.asarray(membraneimageI)
+     
+        
         
         membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround, inisigmaguess)
        
@@ -186,8 +193,8 @@ class Linescan():
             i (list of numbers): the intensity values
         """
         #populate linescan position/intensity
-        self.x = np.asarray(x) #position list as NumPy array of floats
-        self.i = np.asarray(i) #intensity list as NumPy array of floats
+        self.x = x #position list as NumPy array of floats
+        self.i = i #intensity list as NumPy array of floats
         self.inisigmaguess = inisigmaguess
         #detminere a few easy parameters from position/intensity
         self.H = self.x[-1] - self.x[0]
@@ -403,8 +410,8 @@ class Cortex():
                 (self.actin.i_in - self.actin.i_peak))>=0:
 
             #loops through several different starting values for i_c and h
-            for i_c_factor in np.arange(0.1,2.5,0.5):
-                for h_factor in np.arange(0.1,2.5,0.5):
+            for i_c_factor in np.arange(0.2,3.5,0.5):
+                for h_factor in np.arange(0.2,3.5,0.5):
 
                     i_c_start = self.actin.i_peak * i_c_factor
                     delta_start = ((self.sigma_actin**2 / delta*2) *
@@ -433,7 +440,7 @@ class Cortex():
                 self.h, self.i_c = p1
                 actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
                 self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
-                self.X_c = self.memb.x_peak + abs(self.h) / 2.
+                self.X_c = self.memb.x_peak + (self.h) / 2.
                 
     
     def residuals(self,p):
