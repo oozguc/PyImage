@@ -261,6 +261,10 @@ class Linescan():
         #perform fit with starting values
         #p0 = [a, sigma, mu, b]
         p1, sucess  = optimize.curve_fit(fit_func,self.x_fit, self.i_fit,  p0 = [a, sigma, mu, b], maxfev = 1000000)
+        #optimize.leastsq(self.residuals_gauss,p0,
+                                      #  args=(self.x_fit, self.i_fit),
+                                       # maxfev = 1000000)
+        #optimize.curve_fit(fit_func,self.x_fit, self.i_fit,  p0 = [a, sigma, mu, b], maxfev = 1000000)
         
       
         self.gauss_params = p1
