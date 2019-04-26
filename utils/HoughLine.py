@@ -20,7 +20,7 @@ import os
 from sklearn.preprocessing import PolynomialFeatures 
 from bokeh.io import export_png, output_notebook
 from bokeh.plotting import figure, output_file, show
-
+from sklearn.cluster import KMeans
 
 def show_poly_regression(X, Y, degree = 2):    
  
@@ -60,12 +60,34 @@ def show_plot(points,  ymin, ymax):
     ax.set_ylabel('Thickness (um)')
     plt.show()
  
+def show_intensity_plot(points,  ymin, ymax, num_clusters = num_clusters ):
+
+    
+    fig, ax = plt.subplots() 
+    ax.plot(points[:, 1], points[: , 0], '.b', alpha=0.6,
+        label='Inlier data')
+    x_min, x_max = ax.get_xlim()
+    ax.axis([x_min,x_max, ymin, ymax])
+    ax.set_xlabel('Intensity')
+    ax.set_ylabel('Thickness (um)')
+    X = np.column_stack([points[:, 1], points[: , 0]])  
+    kmeans = KMeans(n_clusters=num_clusters) # You want cluster the passenger records into 2
+    kmeans.fit(X)
+    y_kmeans = kmeans.predict(X)
+    plt.scatter(X[:,0], X[:,1], c=y_kmeans, s=50, cmap='viridis')
+    centers = kmeans.cluster_centers_
+    plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5);
+    for i in range(0, len(centers)):
+     print('X:', centers[i, 0], 'Y: ', centers[i, 1])
+    plt.show()
+ 
+
 def Correlation_plot(pointsA, pointsB):
     
     fig, ax = plt.subplots()
     
-    ax.plot(pointsA, pointsB, '.b', alpha = 0.6, label = 'Correlation plot')
-       
+    ax.plot(pointsB, pointsA, '.b', alpha = 0.6, label = 'Correlation plot')
+     
     ax.set_xlabel('Intensity')
     ax.set_ylabel('Thickness (um)')
     
