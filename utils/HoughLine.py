@@ -60,7 +60,7 @@ def show_plot(points,  ymin, ymax):
     ax.set_ylabel('Thickness (um)')
     plt.show()
  
-def show_intensity_plot(points,  ymin, ymax, num_clusters = num_clusters ):
+def show_intensity_plot(points,  ymin, ymax, num_clusters  ):
 
     
     fig, ax = plt.subplots() 
@@ -93,6 +93,20 @@ def Correlation_plot(pointsA, pointsB):
     
     plt.show()
 
+def Peak_Data(pointsA, pointsB, title):
+    
+    
+
+    
+    
+    fig, ax = plt.subplots()
+    
+    ax.plot(pointsB, pointsA, '.b', alpha = 0.6, label = 'Peak-Data' + title)
+    ax.set_xlabel('Data')
+    ax.set_ylabel('Peak')
+    
+    plt.show()    
+    
 def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_trials=1000, Xrange = 100, displayoutlier= False):
    
     # fit line using all data

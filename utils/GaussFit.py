@@ -104,7 +104,7 @@ def ReadFit(X, I, membraneX, membraneI, Fitaround
 
 
 def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Intensity, Time):
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity,Peak_Actin, Data_Actin, Peak_Membrane, Data_Membrane,  Time):
     
     
     PeakDiffArray = []
@@ -146,18 +146,25 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
         PeakActin = GaussFit.gauss_params[2]
         PeakMembrane = membraneimageGaussFit.gauss_params[2]
         PeakDiff = PeakActin - PeakMembrane 
-        if CortexThickness.h is not None :
+        
+        Peak_Actin.append(PeakActin)
+        Peak_Membrane.append(PeakMembrane)
+        Data_Actin.append(np.argmax(I)* Xcalibration)
+        Data_Membrane.append(np.argmax(membraneimageI)* Xcalibration)
+        
+        
+        if CortexThickness.h is not None and CortexThickness.h > 0:
             if i%showaftertime==0:
                print('Time point:', i) 
                print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
                print("Actin Fit:", GaussFit.gauss_params ) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
-               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), (CortexThickness.X_c), (CortexThickness.i_c))
+               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*(CortexThickness.h), (CortexThickness.X_c), (CortexThickness.i_c))
             if math.isnan(CortexThickness.h) == False:
                
-             Thickness.append(abs(CortexThickness.h)) 
-             Intensity.append(abs(CortexThickness.i_c))   
+             Thickness.append((CortexThickness.h)) 
+             Intensity.append((I.max()))   
              PeakDiffArray.append(PeakDiff)
             
             else:
@@ -165,7 +172,7 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
                 Intensity.append(0)
             Time.append(i * Time_unit)
            
-    return Thickness, Intensity, Time      
+        
 
     
     
