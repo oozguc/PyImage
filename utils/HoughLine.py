@@ -103,7 +103,7 @@ def Peak_Data(pointsA, pointsB, title):
     
     ax.plot(pointsB, pointsA, '.b', alpha = 0.6, label = 'Peak-Data' + title)
     ax.set_xlabel('Data')
-    ax.set_ylabel('Peak')
+    ax.set_ylabel('Peak'+ title)
     
     plt.show()    
     

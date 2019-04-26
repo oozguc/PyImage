@@ -153,7 +153,7 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
         Data_Membrane.append(np.argmax(membraneimageI)* Xcalibration)
         
         
-        if CortexThickness.h is not None and CortexThickness.h > 0:
+        if CortexThickness.h is not None and CortexThickness.h > 0 and (abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration or abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration) :
             if i%showaftertime==0:
                print('Time point:', i) 
                print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
