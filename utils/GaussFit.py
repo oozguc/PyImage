@@ -104,7 +104,7 @@ def ReadFit(X, I, membraneX, membraneI, Fitaround
 
 
 def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Time):
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity, Time):
     
     
     PeakDiffArray = []
@@ -157,15 +157,15 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
             if math.isnan(CortexThickness.h) == False:
                
              Thickness.append(abs(CortexThickness.h)) 
-                
+             Intensity.append(abs(CortexThickness.i_c))   
              PeakDiffArray.append(PeakDiff)
             
             else:
                 Thickness.append(0) 
-            
+                Intensity.append(0)
             Time.append(i * Time_unit)
            
-    return Thickness, Time      
+    return Thickness, Intensity, Time      
 
     
     

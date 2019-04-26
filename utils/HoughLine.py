@@ -59,7 +59,18 @@ def show_plot(points,  ymin, ymax):
     ax.set_xlabel('Time (s)')
     ax.set_ylabel('Thickness (um)')
     plt.show()
+ 
+def Correlation_plot(pointsA, pointsB):
     
+    fig, ax = plt.subplots()
+    
+    ax.plot(pointsA, pointsB, '.b', alpha = 0.6, label = 'Correlation plot')
+       
+    ax.set_xlabel('Intensity')
+    ax.set_ylabel('Thickness (um)')
+    
+    plt.show()
+
 def show_ransac_points_line(points,  min_samples=2, residual_threshold=0.1, max_trials=1000, Xrange = 100, displayoutlier= False):
    
     # fit line using all data
