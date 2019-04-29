@@ -102,9 +102,99 @@ def ReadFit(X, I, membraneX, membraneI, Fitaround
            
         return Thickness, Time 
 
+def ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time):
+    
+    meanActin = 0
+    meanMembrane = 0
+    
+    fig, ax = plt.subplots(1, 2, figsize=(10, 10))
+    
+    Shift_Actin = []
+    Shift_Membrane = []
+    
+    for i in range(0, len(Block_Actin)):
+        Actin_param, Actin_X, Actin_I = Block_Actin[i]
+        meanActin = meanActin + Actin_param[2]
+    for i in range(0, len(Block_Membrane)):    
+        Membrane_param, Membrane_X, Membrane_I = Block_Membrane[i]
+        meanMembrane = meanMembrane + Membrane_param[2]
+        
+    meanActin = meanActin / len(Block_Actin)
+    meanMembrane = meanMembrane / len(Block_Membrane)
+    print(meanActin, meanMembrane)
+    for i in range(0, len(Block_Actin)): 
+        Actin_param, Actin_X, Actin_I = Block_Actin[i]
+    
+        
+        Actin_X = Actin_X - (Actin_param[2] -  meanActin)
+        ax[0].plot(Actin_X,Actin_I)
+        ax[0].set_title('Actin')
+        
+        Shift_Actin.append([Actin_X, Actin_I])
+    Shift_Actin = np.asarray(Shift_Actin)
+    oneDActin = np.mean(Shift_Actin, axis = 0)
+    
+    
+        
+    for i in range(0, len(Block_Membrane)): 
+        Membrane_param, Membrane_X, Membrane_I = Block_Membrane[i]
+   
+        
+        Membrane_X = Membrane_X - (Membrane_param[2] -  meanMembrane)
+        ax[1].plot(Membrane_X,Membrane_I)
+        ax[1].set_title('Membrane')
+        Shift_Membrane.append([Membrane_X, Membrane_I])  
+    
+    Shift_Membrane = np.asarray(Shift_Membrane)
+    plt.show()
+    oneDMembrane = np.mean(Shift_Membrane, axis = 0)
+    plt.plot(oneDActin[0],oneDActin[1])
+    plt.plot(oneDMembrane[0],oneDMembrane[1])
+    plt.title('Mean Membrane-Actin Shifted')
+    
+    
+    
+    membraneimageGaussFit = Linescan(oneDMembrane[0],oneDMembrane[1], Fitaround, inisigmaguess)
+       
+        
+    GaussFit = Linescan(oneDActin[0],oneDActin[1], Fitaround, inisigmaguess)
+    
+    
+    
+    CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf, 2)  
+    CortexThickness.get_h_i_c()
+   
+        
 
+        
+        
+    if CortexThickness.h is not None:
+            
+             
+               print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
+               print("Actin Fit:", GaussFit.gauss_params ) 
+               CortexThickness.plot_lss()
+               CortexThickness.plot_fits()
+               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), abs(CortexThickness.X_c), (CortexThickness.i_c))
+               
+               
+               Thickness.append(abs(CortexThickness.h)) 
+               Intensity.append((oneDActin[1].max()))   
+            
+        
+   
+    else:
+                  Thickness.append(0) 
+                  Intensity.append(0)
+           
+           
+        
+
+    
+    
 def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Intensity,Peak_Actin, Data_Actin, Peak_Membrane, Data_Membrane,  Time):
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity,Peak_Actin, Block_Actin, Peak_Membrane, Block_Membrane,  Time):
     
     
     PeakDiffArray = []
@@ -138,42 +228,14 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
         
         GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
        
-        
-        
-        
-        CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf, 2)  
-        CortexThickness.get_h_i_c()
         PeakActin = GaussFit.gauss_params[2]
         PeakMembrane = membraneimageGaussFit.gauss_params[2]
-        PeakDiff = PeakActin - PeakMembrane 
+        if(abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration and abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration):
+          Block_Actin.append([GaussFit.gauss_params, X, I] )
+          Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI] )
         
-        Peak_Actin.append(PeakActin)
-        Peak_Membrane.append(PeakMembrane)
-        Data_Actin.append(np.argmax(I)* Xcalibration)
-        Data_Membrane.append(np.argmax(membraneimageI)* Xcalibration)
-        
-        
-        if CortexThickness.h is not None and CortexThickness.h > 0 and (abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration or abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration) :
-            if i%showaftertime==0:
-               print('Time point:', i) 
-               print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
-               print("Actin Fit:", GaussFit.gauss_params ) 
-               CortexThickness.plot_lss()
-               CortexThickness.plot_fits()
-               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*(CortexThickness.h), (CortexThickness.X_c), (CortexThickness.i_c))
-            if math.isnan(CortexThickness.h) == False:
-               
-             Thickness.append((CortexThickness.h)) 
-             Intensity.append((I.max()))   
-             PeakDiffArray.append(PeakDiff)
-            
-            else:
-                Thickness.append(0) 
-                Intensity.append(0)
-            Time.append(i * Time_unit)
-           
-        
-
+    ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time)
     
     
     
@@ -513,7 +575,10 @@ class Cortex():
 
             #X_c is the position of the center of the cortex
             #x_c is the position of the cortex peak
-            X_c_try = self.memb.x_peak + p[0] / 2.
+            if self.memb.x_peak > self.actin.x_peak:
+             X_c_try = self.memb.x_peak - p[0] / 2
+            else:
+             X_c_try = self.memb.x_peak + p[0] / 2   
             delta_try = (self.sigma_actin**2 / p[0]) * np.log((self.actin.i_out - p[1]) / (self.actin.i_in - p[1]))
             x_c_try = X_c_try - delta_try
             i_peak_try = convolved([self.actin.i_in, p[1], self.actin.i_out, p[0], X_c_try, self.sigma_actin], x_c_try)

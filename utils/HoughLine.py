@@ -6,7 +6,7 @@ from skimage.transform import (hough_line, hough_line_peaks,
 from matplotlib import cm
 import matplotlib.pyplot as plt
 from skimage.measure import LineModelND, ransac
-
+from numpy.linalg import norm
 from scipy import ndimage as ndi
 from skimage.filters import roberts, sobel, scharr, prewitt, gaussian
 from skimage.morphology import watershed
@@ -79,9 +79,16 @@ def show_intensity_plot(points,  ymin, ymax, num_clusters  ):
     plt.scatter(centers[:, 0], centers[:, 1], c='black', s=200, alpha=0.5);
     for i in range(0, len(centers)):
      print('X:', centers[i, 0], 'Y: ', centers[i, 1])
+     distances = compute_distance(X, centers, num_clusters)
+     print('Standard deviation:', np.mean(distances))
     plt.show()
  
-
+def compute_distance(X, centroids, n_clusters):
+        distance = np.zeros((X.shape[0], n_clusters))
+        for k in range(n_clusters):
+            row_norm = norm(X - centroids[k, :], axis=1)
+            distance[:, k] = np.square(row_norm)
+        return distance
 def Correlation_plot(pointsA, pointsB):
     
     fig, ax = plt.subplots()
