@@ -89,14 +89,16 @@ def compute_distance(X, centroids, n_clusters):
             row_norm = norm(X - centroids[k, :], axis=1)
             distance[:, k] = np.square(row_norm)
         return distance
-def Correlation_plot(pointsA, pointsB):
+def Correlation_plot(pointsA, pointsB, id):
     
     fig, ax = plt.subplots()
     
     ax.plot(pointsB, pointsA, '.b', alpha = 0.6, label = 'Correlation plot')
-     
-    ax.set_xlabel('Intensity')
-    ax.set_ylabel('Thickness (um)')
+    for i in range(0, len(id)):
+     currentid = id[i]   
+     ax.text(pointsB[currentid-1], pointsA[currentid-1], str(currentid)) 
+     ax.set_xlabel('Intensity')
+     ax.set_ylabel('Thickness (um)')
     
     plt.show()
 
