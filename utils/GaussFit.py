@@ -82,28 +82,29 @@ def ReadFit(X, I, membraneX, membraneI, Fitaround
         PeakMembrane = membraneimageGaussFit.gauss_params[2]
         PeakDiff = PeakActin - PeakMembrane 
         if CortexThickness.h is not None :
-            
-               
+            Time.append(i)    
+            if i%showaftertime == 0: 
+               print('time:', i) 
                print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
                print("Actin Fit:", GaussFit.gauss_params ) 
                CortexThickness.plot_lss()
                CortexThickness.plot_fits()
                print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), (CortexThickness.X_c), (CortexThickness.i_c))
-               if math.isnan(CortexThickness.h) == False:
                
-                  Thickness.append(abs(CortexThickness.h)) 
+               
+            Thickness.append(abs(CortexThickness.h)) 
                 
                   
             
-               else:
-                  Thickness.append(0) 
-            
-               Time.append(i)
+        else:
+          Thickness.append(0) 
+          Time.append(i)  
+             
            
         return Thickness, Time 
 
 def ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time):
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time, t):
     
     meanActin = 0
     meanMembrane = 0
@@ -122,7 +123,7 @@ def ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
         
     meanActin = meanActin / len(Block_Actin)
     meanMembrane = meanMembrane / len(Block_Membrane)
-    print(meanActin, meanMembrane)
+    
     for i in range(0, len(Block_Actin)): 
         Actin_param, Actin_X, Actin_I = Block_Actin[i]
     
@@ -179,15 +180,17 @@ def ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
                print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), abs(CortexThickness.X_c), (CortexThickness.i_c))
                
                
+               Time.append(t)
                Thickness.append(abs(CortexThickness.h)) 
                Intensity.append((oneDActin[1].max()))   
-            
-        
+               
+                     
    
     else:
                   Thickness.append(0) 
                   Intensity.append(0)
-           
+                  
+                  Time.append(0)
            
         
 
@@ -233,11 +236,38 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
         if(abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration and abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration):
           Block_Actin.append([GaussFit.gauss_params, X, I] )
           Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI] )
-        
+          
     ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time)
     
     
+
+    
+def StripFitTime( X, I, membraneimageX, membraneimageI, Time_unit,Xcalibration,  Fitaround
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity, Block_Actin, Block_Membrane,  Time, t):
+    
+    
+    
+    
+    
+
+     
+        
+        
+        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround, inisigmaguess)
+       
+        
+        GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
+       
+        PeakActin = GaussFit.gauss_params[2]
+        PeakMembrane = membraneimageGaussFit.gauss_params[2]
+        if(abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration and abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration):
+          Block_Actin.append([GaussFit.gauss_params, X, I]) 
+          Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI])
+          
+
+     
+        
     
 def fit_func(x, a, sigma, mu, c ):
     """Definition of gaussian function used to fit linescan peaks.

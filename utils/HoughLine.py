@@ -60,7 +60,7 @@ def show_plot(points,  ymin, ymax):
     ax.set_ylabel('Thickness (um)')
     plt.show()
  
-def show_intensity_plot(points,  ymin, ymax, num_clusters  ):
+def show_intensity_plot(points,  ymin, ymax, num_clusters, title = None  ):
 
     
     fig, ax = plt.subplots() 
@@ -68,7 +68,10 @@ def show_intensity_plot(points,  ymin, ymax, num_clusters  ):
         label='Inlier data')
     x_min, x_max = ax.get_xlim()
     ax.axis([x_min,x_max, ymin, ymax])
-    ax.set_xlabel('Intensity')
+    if title is None:
+     ax.set_xlabel('Intensity')
+    else:
+     ax.set_xlabel(title)   
     ax.set_ylabel('Thickness (um)')
     X = np.column_stack([points[:, 1], points[: , 0]])  
     kmeans = KMeans(n_clusters=num_clusters) # You want cluster the passenger records into 2
