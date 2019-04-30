@@ -103,7 +103,116 @@ def ReadFit(X, I, membraneX, membraneI, Fitaround
            
         return Thickness, Time 
 
-def ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
+    
+def FinalShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time, t):
+    
+    meanActin = 0
+    meanMembrane = 0
+    
+    Total_Block_Actin = []
+    Total_Block_Membrane = []
+    
+    for i in range(0, len(Block_Actin)):
+        
+        X = Block_Actin[i][0]
+        I = Block_Actin[i][1]
+        
+        membraneimageX = Block_Membrane[i][0]
+        membraneimageI = Block_Membrane[i][1]
+        
+        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround, inisigmaguess)
+       
+        
+        GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
+         
+            
+        meanActin = meanActin + GaussFit.gauss_params[2]    
+        meanMembrane = meanMembrane + membraneimageGaussFit.gauss_params[2]
+        
+        Total_Block_Actin.append([GaussFit.gauss_params, X, I])
+        Total_Block_Membrane.append([membraneimageGaussFit.gauss_params,membraneimageX,membraneimageI ])
+        
+    meanActin = meanActin / len(Block_Actin)
+    meanMembrane = meanMembrane / len(Block_Membrane)    
+    fig, ax = plt.subplots(1, 2, figsize=(10, 10))
+    
+    Shift_Actin = []
+    Shift_Membrane = []
+    
+
+    for i in range(0, len(Total_Block_Actin)): 
+        Actin_param, Actin_X, Actin_I = Total_Block_Actin[i]
+    
+        
+        Actin_X = Actin_X - (Actin_param[2] -  meanActin)
+        ax[0].plot(Actin_X,Actin_I)
+        ax[0].set_title('Actin')
+        
+        Shift_Actin.append([Actin_X, Actin_I])
+    Shift_Actin = np.asarray(Shift_Actin)
+    oneDActin = np.mean(Shift_Actin, axis = 0)
+    
+    
+    for i in range(0, len(Total_Block_Membrane)): 
+        Membrane_param, Membrane_X, Membrane_I = Total_Block_Membrane[i]
+   
+        
+        Membrane_X = Membrane_X - (Membrane_param[2] -  meanMembrane)
+        ax[1].plot(Membrane_X,Membrane_I)
+        ax[1].set_title('Membrane')
+        Shift_Membrane.append([Membrane_X, Membrane_I])  
+    
+    Shift_Membrane = np.asarray(Shift_Membrane)
+    plt.show()
+    oneDMembrane = np.mean(Shift_Membrane, axis = 0)
+   
+    plt.plot(oneDActin[0],oneDActin[1])
+    plt.plot(oneDMembrane[0],oneDMembrane[1])
+    plt.title('Mean Membrane-Actin Shifted')
+    
+    
+    
+    membraneimageGaussFit = Linescan(oneDMembrane[0],oneDMembrane[1], Fitaround, inisigmaguess)
+       
+        
+    GaussFit = Linescan(oneDActin[0],oneDActin[1], Fitaround, inisigmaguess)
+    
+    
+    
+    CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf, 2)  
+    CortexThickness.get_h_i_c()
+   
+        
+
+        
+        
+    if CortexThickness.h is not None:
+            
+             
+               print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
+               print("Actin Fit:", GaussFit.gauss_params ) 
+               CortexThickness.plot_lss()
+               CortexThickness.plot_fits()
+               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), abs(CortexThickness.X_c), (CortexThickness.i_c))
+               
+               
+               Time.append(t)
+               Thickness.append(abs(CortexThickness.h)) 
+               Intensity.append((oneDActin[1].max()))   
+               
+                     
+   
+    else:
+                  Thickness.append(0) 
+                  Intensity.append(0)
+                  
+                  Time.append(0)
+    
+    
+    
+    
+def ShiftFit(Block_Actin, Block_Membrane,BlockAverageActin,BlockAverageMembrane, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time, t):
     
     meanActin = 0
@@ -135,7 +244,7 @@ def ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
         Shift_Actin.append([Actin_X, Actin_I])
     Shift_Actin = np.asarray(Shift_Actin)
     oneDActin = np.mean(Shift_Actin, axis = 0)
-    
+    BlockAverageActin.append(oneDActin)
     
         
     for i in range(0, len(Block_Membrane)): 
@@ -150,6 +259,9 @@ def ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
     Shift_Membrane = np.asarray(Shift_Membrane)
     plt.show()
     oneDMembrane = np.mean(Shift_Membrane, axis = 0)
+    BlockAverageMembrane.append(oneDMembrane)
+    
+    
     plt.plot(oneDActin[0],oneDActin[1])
     plt.plot(oneDMembrane[0],oneDMembrane[1])
     plt.title('Mean Membrane-Actin Shifted')
@@ -197,7 +309,7 @@ def ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
     
     
 def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Intensity,Peak_Actin, Block_Actin, Peak_Membrane, Block_Membrane,  Time):
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity,Peak_Actin, Block_Actin, Peak_Membrane, Block_Membrane,BlockAverageActin,BlockAverageMembrane,Time, t):
     
     
     PeakDiffArray = []
@@ -237,8 +349,8 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
           Block_Actin.append([GaussFit.gauss_params, X, I] )
           Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI] )
           
-    ShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time)
+    ShiftFit(Block_Actin, Block_Membrane,BlockAverageActin,BlockAverageMembrane, Time_unit, Xcalibration, Fitaround
+             , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time, t)
     
     
 
