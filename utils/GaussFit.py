@@ -282,7 +282,7 @@ def ShiftFit(Block_Actin, Block_Membrane,BlockAverageActin,BlockAverageMembrane,
 
         
         
-    if CortexThickness.h is not None:
+    if CortexThickness.h is not None and abs(CortexThickness.h) < 1.0E100:
             
              
                print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
