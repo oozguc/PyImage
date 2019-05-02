@@ -130,8 +130,8 @@ def FinalShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaroun
         meanActin = meanActin + GaussFit.gauss_params[2]    
         meanMembrane = meanMembrane + membraneimageGaussFit.gauss_params[2]
         
-        Total_Block_Actin.append([GaussFit.gauss_params, X, I])
-        Total_Block_Membrane.append([membraneimageGaussFit.gauss_params,membraneimageX,membraneimageI ])
+        Total_Block_Actin.append([GaussFit.gauss_params, X, gauss_func(GaussFit.gauss_params,X)])
+        Total_Block_Membrane.append([membraneimageGaussFit.gauss_params,membraneimageX,gauss_func(membraneimageGaussFit.gauss_params,membraneimageX) ])
         
     meanActin = meanActin / len(Block_Actin)
     meanMembrane = meanMembrane / len(Block_Membrane)    
@@ -346,8 +346,8 @@ def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
         PeakActin = GaussFit.gauss_params[2]
         PeakMembrane = membraneimageGaussFit.gauss_params[2]
         if(abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration and abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration):
-          Block_Actin.append([GaussFit.gauss_params, X, I] )
-          Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI] )
+          Block_Actin.append([GaussFit.gauss_params, X, gauss_func(GaussFit.gauss_params,X)] )
+          Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, gauss_func(membraneimageGaussFit.gauss_params,membraneimageX)] )
           
     ShiftFit(Block_Actin, Block_Membrane,BlockAverageActin,BlockAverageMembrane, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time, t)
@@ -374,8 +374,8 @@ def StripFitTime( X, I, membraneimageX, membraneimageI, Time_unit,Xcalibration, 
         PeakActin = GaussFit.gauss_params[2]
         PeakMembrane = membraneimageGaussFit.gauss_params[2]
         if(abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration and abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration):
-          Block_Actin.append([GaussFit.gauss_params, X, I]) 
-          Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI])
+          Block_Actin.append([GaussFit.gauss_params, X, gauss_func(GaussFit.gauss_params,X)]) 
+          Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, gauss_func(membraneimageGaussFit.gauss_params,membraneimageX)])
           
 
      
