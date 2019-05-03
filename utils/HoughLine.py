@@ -99,10 +99,15 @@ def Correlation_plot(pointsA, pointsB, id):
     ax.plot(pointsB, pointsA, '.b', alpha = 0.6, label = 'Correlation plot')
     for i in range(0, len(id)):
      currentid = id[i]
-     if len(pointsB) == currentid - 1 and len(pointsA) == currentid - 1:
-      ax.text(pointsB[currentid-1], pointsA[currentid-1], str(currentid)) 
-      ax.set_xlabel('Intensity')
-      ax.set_ylabel('Thickness (um)')
+     try:
+           x = pointsB[currentid-1]
+           y = pointsA[currentid-1]
+          
+     except IndexError:
+            continue
+     ax.text(pointsB[currentid-1], pointsA[currentid-1], str(currentid)) 
+     ax.set_xlabel('Intensity')
+     ax.set_ylabel('Thickness (um)')
     
     plt.show()
 
