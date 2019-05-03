@@ -60,7 +60,7 @@ def show_plot(points,  ymin, ymax):
     ax.set_ylabel('Thickness (um)')
     plt.show()
  
-def show_intensity_plot(points,  ymin, ymax, num_clusters, title = None  ):
+def show_intensity_plot(points,save_dir,name,  ymin, ymax, num_clusters, title = None  ):
 
     
     fig, ax = plt.subplots() 
@@ -84,8 +84,14 @@ def show_intensity_plot(points,  ymin, ymax, num_clusters, title = None  ):
      print('X:', centers[i, 0], 'Y: ', centers[i, 1])
      distances = compute_distance(X, centers, num_clusters)
      print('Standard deviation:', np.mean(distances))
+    
+    if title is not None:
+     plt.savefig(save_dir + "/" + name + " Thickness-" + title + '.png')
+    else:
+     plt.savefig(save_dir + "/" + name + " Thickness-" + "Intensity" + '.png')  
     plt.show()
- 
+    
+    
 def compute_distance(X, centroids, n_clusters):
         distance = np.zeros((X.shape[0], n_clusters))
         for k in range(n_clusters):
