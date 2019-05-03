@@ -215,9 +215,9 @@ def FinalShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaroun
 def ShiftFit(Block_Actin, Block_Membrane,BlockAverageActin,BlockAverageMembrane, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time, t):
     
-    meanActin = 0
-    meanMembrane = 0
-    
+  meanActin = 0
+  meanMembrane = 0
+  if len(Block_Actin) > 0 and len(Block_Membrane) > 0:
     fig, ax = plt.subplots(1, 2, figsize=(10, 10))
     
     Shift_Actin = []
