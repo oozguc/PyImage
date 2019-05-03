@@ -107,12 +107,12 @@ def ReadFit(X, I, membraneX, membraneI, Fitaround
 def FinalShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time, t):
     
-    meanActin = 0
-    meanMembrane = 0
+  meanActin = 0
+  meanMembrane = 0
     
-    Total_Block_Actin = []
-    Total_Block_Membrane = []
-    
+  Total_Block_Actin = []
+  Total_Block_Membrane = []
+  if len(Block_Actin) > 0 and len(Block_Membrane) > 0:
     for i in range(0, len(Block_Actin)):
         
         X = Block_Actin[i][0]
