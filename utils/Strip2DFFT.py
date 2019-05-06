@@ -47,10 +47,10 @@ def CrossCorrelationStrip(imageA, imageB):
 
 
   
-def RMSStrip(imageA):
+def RMSStrip(imageA, cal):
     rmstotal = np.empty(imageA.shape[0])
     PointsSample = imageA.shape[1]
-    peri = range(0, imageA.shape[0])
+    peri = range(0, int(np.round(imageA.shape[0] * cal)))
     for i in range(imageA.shape[0] - 1):
         stripA = imageA[i,:]
         RMS = sqrt(mean(square(stripA)))
