@@ -17,10 +17,15 @@ from skimage.morphology import remove_small_objects, binary_erosion
 from skimage.filters import threshold_otsu, threshold_mean
 from skimage.exposure import rescale_intensity
 import os
+from scipy.ndimage import gaussian_filter
 from sklearn.preprocessing import PolynomialFeatures 
 from bokeh.io import export_png, output_notebook
 from bokeh.plotting import figure, output_file, show
 from sklearn.cluster import KMeans
+from skimage import feature, filters
+from scipy import ndimage
+
+
 
 def show_poly_regression(X, Y, degree = 2):    
  
@@ -201,7 +206,30 @@ def show_ransac_line(img, Xcalibration, Time_unit, maxlines, min_samples=2, resi
  
     ax.imshow(img)
     
+def watershed_binary(image, size):
+ 
+ 
+ distance = ndi.distance_transform_edt(image)
 
+ gauss = gaussian_filter(distance, 2)
+
+ local_maxi = peak_local_max(gauss, indices=False, footprint=np.ones((9, 9)),
+                            labels=image)
+ markers = ndi.label(0.1 * local_maxi)[0]
+ labels = watershed(-distance, markers, mask=image)
+
+
+ nonormimg = remove_small_objects(labels, min_size=size, connectivity=4, in_place=False)
+ nonormimg, forward_map, inverse_map = relabel_sequential(nonormimg)    
+ labels = nonormimg
+
+    
+    
+ 
+ #plt.imshow(labels)
+ #plt.title('Watershed labels')   
+ #plt.show()
+ return labels   
 def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_unit):
  distance = ndi.distance_transform_edt(image)
  
