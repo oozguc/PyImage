@@ -206,16 +206,16 @@ def show_ransac_line(img, Xcalibration, Time_unit, maxlines, min_samples=2, resi
  
     ax.imshow(img)
     
-def watershed_binary(image, size):
+def watershed_binary(image, size, gaussradius, kernel, peakpercent):
  
  
  distance = ndi.distance_transform_edt(image)
 
- gauss = gaussian_filter(distance, 2)
+ gauss = gaussian_filter(distance, gaussradius)
 
- local_maxi = peak_local_max(gauss, indices=False, footprint=np.ones((9, 9)),
+ local_maxi = peak_local_max(gauss, indices=False, footprint=np.ones((kernel, kernel)),
                             labels=image)
- markers = ndi.label(0.1 * local_maxi)[0]
+ markers = ndi.label(peakpercent * local_maxi)[0]
  labels = watershed(-distance, markers, mask=image)
 
 
