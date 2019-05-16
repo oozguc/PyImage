@@ -314,17 +314,61 @@ def ShiftFit(Block_Actin, Block_Membrane,BlockAverageActin,BlockAverageMembrane,
                   Time.append(0)
            
         
+def takeSecond(elem):
+    return elem[1]
 
+
+def takeFirst(elem):
+    return elem[0]
+
+def SelectScan(membraneimage, image, Xcalibration, N):
+    
+    assert(image.shape == membraneimage.shape)
+    
+    Scanindex = []
+    Measureindex = []
+    for i in range(image.shape[1]):
+        X = []
+        I = []
+        membraneimageX = []
+        membraneimageI = []
+        strip = image[:image.shape[0],i]
+        membraneimagestrip = membraneimage[:membraneimage.shape[0],i]
+        for j in range(strip.shape[0]):
+           X.append(j * Xcalibration)
+           I.append(strip[j])
+        
+        
+        X = np.asarray(X)
+        I = np.asarray(I)
+        
+        Scanindex.append([i, np.amax(I)])
+        
+    sortedList = sorted(Scanindex, key = takeSecond, reverse = True)    
+    
+  
+    
+    for i in range(N):
+        index,value = sortedList[i]
+        Measureindex.append([index, value])
+        
+        
+    SortedMeasureindex =  sorted(Measureindex, key = takeFirst)     
+    print(SortedMeasureindex)
+    
+    return SortedMeasureindex
     
     
-def StripFit( membraneimage,image, Time_unit, Xcalibration, Fitaround
+def StripFit( membraneimage,image,N, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime,Thickness, Intensity,Peak_Actin, Block_Actin, Peak_Membrane, Block_Membrane,BlockAverageActin,BlockAverageMembrane,Time, t):
     
     
     PeakDiffArray = []
+    SortedMeasureindex = SelectScan(membraneimage, image, Xcalibration, N)
+    
     
     assert(image.shape == membraneimage.shape)
-    for i in range(image.shape[1]):
+    for i, maxintensity in SortedMeasureindex:
         X = []
         I = []
         membraneimageX = []
