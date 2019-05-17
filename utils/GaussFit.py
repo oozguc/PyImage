@@ -299,6 +299,14 @@ def takeSecond(elem):
 def takeFirst(elem):
     return elem[0]
 
+def MegaBlock(Block):
+    
+        allImages = Block[0]
+        for i in range(1, len(Block)):
+          allImages = np.hstack((allImages, Block[i]))
+    
+        return allImages
+
 def SelectScan(membraneimage, image, Xcalibration, N):
     
     assert(image.shape == membraneimage.shape)
