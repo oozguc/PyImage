@@ -133,15 +133,12 @@ def FinalShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaroun
         
         GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
          
-            
-        meanActin = meanActin + GaussFit.gauss_params[2]    
-        meanMembrane = meanMembrane + membraneimageGaussFit.gauss_params[2]
+
         
         Total_Block_Actin.append([GaussFit.gauss_params, X, I])
         Total_Block_Membrane.append([membraneimageGaussFit.gauss_params,membraneimageX,membraneimageI])
        
-        meanActin = meanActin / len(Block_Actin)
-        meanMembrane = meanMembrane / len(Block_Membrane)
+ 
 
  
     
@@ -154,23 +151,18 @@ def FinalShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaroun
     
     for i in range(0, len(Total_Block_Membrane)): 
         Membrane_param, Membrane_X, Membrane_I = Total_Block_Membrane[i]
-   
+        Actin_param, Actin_X, Actin_I = Total_Block_Actin[i]
         
-        Membrane_X = Membrane_X - ( meanMembrane)
-      
+        shift = Membrane_param[2]
+        
+        Membrane_X = Membrane_X - shift
+        Actin_X = Actin_X - shift
         Shift_Membrane.append([Membrane_X, Membrane_I])  
+        Shift_Actin.append([Actin_X, Actin_I])
+    
     
     Shift_Membrane = np.asarray(Shift_Membrane)
-    
     oneDMembrane = np.mean(Shift_Membrane, axis = 0)
-    for i in range(0, len(Total_Block_Actin)): 
-        Actin_param, Actin_X, Actin_I = Total_Block_Actin[i]
-    
-        
-        Actin_X = Actin_X - ( meanMembrane)
-        
-        
-        Shift_Actin.append([Actin_X, Actin_I])
     Shift_Actin = np.asarray(Shift_Actin)
     oneDActin = np.mean(Shift_Actin, axis = 0)
     plt.plot(oneDActin[0],oneDActin[1])
@@ -221,55 +213,41 @@ def FinalShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaroun
 def ShiftFit(Block_Actin, Block_Membrane,BlockAverageActin,BlockAverageMembrane, Time_unit, Xcalibration, Fitaround
              , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time,  t):
     
-    meanActin = 0
-    meanMembrane = 0
+
   
     
     
     Shift_Actin = []
     Shift_Membrane = []
     
-    for i in range(0, len(Block_Actin)):
-        Actin_param, Actin_X, Actin_I = Block_Actin[i]
-        meanActin = meanActin + Actin_param[2]
-    for i in range(0, len(Block_Membrane)):    
-        Membrane_param, Membrane_X, Membrane_I = Block_Membrane[i]
-        meanMembrane = meanMembrane + Membrane_param[2]
-    if len(Block_Actin) > 0 and len(Block_Membrane) > 0:    
-     meanActin = meanActin / len(Block_Actin)
-     meanMembrane = meanMembrane / len(Block_Membrane)
-    else:  
+
+    if len(Block_Actin) == 0 and len(Block_Membrane) == 0:    
+     
             Thickness.append(0) 
             Intensity.append(0)
-                  
             Time.append(0)   
     
-
-    
-        
     for i in range(0, len(Block_Membrane)): 
         Membrane_param, Membrane_X, Membrane_I = Block_Membrane[i]
-   
+        Actin_param, Actin_X, Actin_I = Block_Actin[i]
         
-        Membrane_X = Membrane_X - ( meanMembrane)
-      
+        shift = Membrane_param[2]
+        
+        Membrane_X = Membrane_X - shift
+        Actin_X = Actin_X - shift
+        
         Shift_Membrane.append([Membrane_X, Membrane_I])  
+        Shift_Actin.append([Actin_X, Actin_I])
+        
+
     
     Shift_Membrane = np.asarray(Shift_Membrane)
-    plt.show()
     oneDMembrane = np.mean(Shift_Membrane, axis = 0)
     BlockAverageMembrane.append(oneDMembrane)
-    for i in range(0, len(Block_Actin)): 
-        Actin_param, Actin_X, Actin_I = Block_Actin[i]
-    
-        
-        Actin_X = Actin_X - (meanMembrane)
-      
-        
-        Shift_Actin.append([Actin_X, Actin_I])
     Shift_Actin = np.asarray(Shift_Actin)
     oneDActin = np.mean(Shift_Actin, axis = 0)
     BlockAverageActin.append(oneDActin)
+    
     if len(Block_Actin) > 0 and len(Block_Membrane) > 0: 
      plt.plot(oneDActin[0],oneDActin[1])
      plt.plot(oneDMembrane[0],oneDMembrane[1])
@@ -354,7 +332,6 @@ def SelectScan(membraneimage, image, Xcalibration, N):
         
         
     SortedMeasureindex =  sorted(Measureindex, key = takeFirst)     
-    print(SortedMeasureindex)
     
     return SortedMeasureindex
     
@@ -415,11 +392,6 @@ def StripFitTime( X, I, membraneimageX, membraneimageI, Time_unit,Xcalibration, 
              , psf, inisigmaguess, showaftertime,Thickness, Intensity, Block_Actin, Block_Membrane,  Time, t):
     
     
-    
-    
-    
-
-     
         
         
         membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround, inisigmaguess)

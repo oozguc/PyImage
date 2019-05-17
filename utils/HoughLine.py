@@ -65,7 +65,7 @@ def show_plot(points,  ymin, ymax):
     ax.set_ylabel('Thickness (um)')
     plt.show()
  
-def show_intensity_plot(points,  ymin, ymax, num_clusters, title = None  ):
+def show_intensity_plot(points,save_dir,name,   ymin, ymax, num_clusters, title = None  ):
 
     
     fig, ax = plt.subplots() 
