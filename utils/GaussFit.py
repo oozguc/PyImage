@@ -306,21 +306,19 @@ def MegaFit(membraneimage, image, N, Time_unit, Xcalibration, Fitaround, psf, in
     
     Shift_Membrane = np.asarray(Shift_Membrane)
     
-    BlockAverageMembrane.append(Shift_Membrane)
     
     
     Shift_Actin = np.asarray(Shift_Actin)
    
-    BlockAverageActin.append(Shift_Actin)
     
 
     
     
-    for i in range(0, len(BlockAverageActin)):
-      membraneimageGaussFit = Linescan(BlockAverageMembrane[i][0],BlockAverageMembrane[i][1], Fitaround, inisigmaguess)
+    for i in range(0, len(Shift_Actin)):
+      membraneimageGaussFit = Linescan(Shift_Membrane[i][0],Shift_Membrane[i][1], Fitaround, inisigmaguess)
        
         
-      GaussFit = Linescan(BlockAverageActin[i][0],BlockAverageActin[i][1], Fitaround, inisigmaguess)
+      GaussFit = Linescan(Shift_Actin[i][0],Shift_Actin[i][1], Fitaround, inisigmaguess)
     
     
     
