@@ -233,13 +233,13 @@ def SelectScan(membraneimage, image, Xcalibration, N):
         Measureindex.append([index, value])
         
         
-    SortedMeasureindex =  sorted(Measureindex, key = takeFirst)     
+    SortedMeasureindex =  sorted(Measureindex, key = takeSecond, reverse = True)     
     
     return SortedMeasureindex
     
  
     
-def MegaFit(membraneimage, image, N, Time_unit, Xcalibration, Fitaround, psf, inisigmaguess, 
+def MegaFit(membraneimage, image, N, Time_unit, Xcalibration,showaftertime, Fitaround, psf, inisigmaguess, 
             Thickness, Intensity,Peak_Actin, Block_Actin, Peak_Membrane, Block_Membrane,BlockAverageActin,BlockAverageMembrane,Time, ID ):
     
     SortedMeasureindex = SelectScan(membraneimage, image, Xcalibration, N)
@@ -268,7 +268,7 @@ def MegaFit(membraneimage, image, N, Time_unit, Xcalibration, Fitaround, psf, in
         membraneimageI = np.asarray(membraneimageI)
      
         ID.append(int(i / Time) + 1)
-        
+        print('ID:', int(i / Time) + 1, 'Maxint:', maxintensity)
         membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround, inisigmaguess)
        
         
@@ -285,10 +285,7 @@ def MegaFit(membraneimage, image, N, Time_unit, Xcalibration, Fitaround, psf, in
         Shift_Membrane = []
     
 
-        if len(Block_Actin) == 0 and len(Block_Membrane) == 0:    
-     
-            Thickness.append(0) 
-            Intensity.append(0)
+
     
         for i in range(0, len(Block_Membrane)): 
             Membrane_param, Membrane_X, Membrane_I = Block_Membrane[i]
@@ -331,7 +328,7 @@ def MegaFit(membraneimage, image, N, Time_unit, Xcalibration, Fitaround, psf, in
         
       if CortexThickness.h is not None and abs(CortexThickness.h) < 1.0E100:
             
-             
+             if i%showaftertime == 0:   
                print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
                print("Actin Fit:", GaussFit.gauss_params ) 
                CortexThickness.plot_lss()
@@ -339,8 +336,8 @@ def MegaFit(membraneimage, image, N, Time_unit, Xcalibration, Fitaround, psf, in
                print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), abs(CortexThickness.X_c), (CortexThickness.i_c))
                
                
-               Thickness.append(abs(CortexThickness.h)) 
-               Intensity.append((Shift_Actin[i][1].max()))   
+             Thickness.append(abs(CortexThickness.h)) 
+             Intensity.append((Shift_Actin[i][1].max()))   
                
                      
    
@@ -666,7 +663,12 @@ class Cortex():
                 self.h, self.i_c = p1
                 actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
                 self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
-                self.X_c = self.memb.x_peak + (self.h) / 2.
+                
+                if self.memb.x_peak > self.actin.x_peak:
+                  self.X_c = self.memb.x_peak - self.h / 2
+                else:
+                  self.X_c = self.memb.x_peak + self.h / 2 
+                
                 
     
     def residuals(self,p):
