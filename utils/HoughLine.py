@@ -17,10 +17,15 @@ from skimage.morphology import remove_small_objects, binary_erosion
 from skimage.filters import threshold_otsu, threshold_mean
 from skimage.exposure import rescale_intensity
 import os
+from scipy.ndimage import gaussian_filter
 from sklearn.preprocessing import PolynomialFeatures 
 from bokeh.io import export_png, output_notebook
 from bokeh.plotting import figure, output_file, show
 from sklearn.cluster import KMeans
+from skimage import feature, filters
+from scipy import ndimage
+
+
 
 def show_poly_regression(X, Y, degree = 2):    
  
@@ -60,7 +65,7 @@ def show_plot(points,  ymin, ymax):
     ax.set_ylabel('Thickness (um)')
     plt.show()
  
-def show_intensity_plot(points,  ymin, ymax, num_clusters, title = None  ):
+def show_intensity_plot(points,save_dir,name,   ymin, ymax, num_clusters, title = None  ):
 
     
     fig, ax = plt.subplots() 
@@ -84,8 +89,14 @@ def show_intensity_plot(points,  ymin, ymax, num_clusters, title = None  ):
      print('X:', centers[i, 0], 'Y: ', centers[i, 1])
      distances = compute_distance(X, centers, num_clusters)
      print('Standard deviation:', np.mean(distances))
+    
+    #if title is not None:
+     #plt.savefig(save_dir + "/" + name + " Thickness-" + title + '.png')
+    #else:
+     #plt.savefig(save_dir + "/" + name + " Thickness-" + "Intensity" + '.png')  
     plt.show()
- 
+    
+    
 def compute_distance(X, centroids, n_clusters):
         distance = np.zeros((X.shape[0], n_clusters))
         for k in range(n_clusters):
@@ -98,7 +109,13 @@ def Correlation_plot(pointsA, pointsB, id):
     
     ax.plot(pointsB, pointsA, '.b', alpha = 0.6, label = 'Correlation plot')
     for i in range(0, len(id)):
-     currentid = id[i]   
+     currentid = id[i]
+     try:
+           x = pointsB[currentid-1]
+           y = pointsA[currentid-1]
+          
+     except IndexError:
+            continue
      ax.text(pointsB[currentid-1], pointsA[currentid-1], str(currentid)) 
      ax.set_xlabel('Intensity')
      ax.set_ylabel('Thickness (um)')
@@ -189,7 +206,30 @@ def show_ransac_line(img, Xcalibration, Time_unit, maxlines, min_samples=2, resi
  
     ax.imshow(img)
     
+def watershed_binary(image, size, gaussradius, kernel, peakpercent):
+ 
+ 
+ distance = ndi.distance_transform_edt(image)
 
+ gauss = gaussian_filter(distance, gaussradius)
+
+ local_maxi = peak_local_max(gauss, indices=False, footprint=np.ones((kernel, kernel)),
+                            labels=image)
+ markers = ndi.label(peakpercent * local_maxi)[0]
+ labels = watershed(-distance, markers, mask=image)
+
+
+ nonormimg = remove_small_objects(labels, min_size=size, connectivity=4, in_place=False)
+ nonormimg, forward_map, inverse_map = relabel_sequential(nonormimg)    
+ labels = nonormimg
+
+    
+    
+ 
+ #plt.imshow(labels)
+ #plt.title('Watershed labels')   
+ #plt.show()
+ return labels   
 def watershed_image(image, size, targetdir, Label, Filename, Xcalibration,Time_unit):
  distance = ndi.distance_transform_edt(image)
  
