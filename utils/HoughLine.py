@@ -112,12 +112,12 @@ def Correlation_plot(pointsA, pointsB,x_min,x_max,y_min,y_max, id):
     for i in range(0, len(id)):
      currentid = id[i]
      try:
-           x = pointsB[currentid-1]
-           y = pointsA[currentid-1]
+           x = pointsB[i]
+           y = pointsA[i]
           
      except IndexError:
             continue
-     ax.text(pointsB[currentid-1], pointsA[currentid-1], str(currentid)) 
+     ax.text(pointsB[i], pointsA[i], str(currentid)) 
      ax.set_xlabel('Intensity')
      ax.set_ylabel('Thickness (um)')
     

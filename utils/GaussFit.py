@@ -274,11 +274,9 @@ def MegaFit(membraneimage, image, N, Time_unit, Xcalibration,showaftertime, Fita
         
         GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
        
-        PeakActin = GaussFit.gauss_params[2]
-        PeakMembrane = membraneimageGaussFit.gauss_params[2]
-        if(abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration and abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration):
-          Block_Actin.append([GaussFit.gauss_params, X, I] )
-          Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI] )
+      
+        Block_Actin.append([GaussFit.gauss_params, X, I] )
+        Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI] )
         
         
         Shift_Actin = []
