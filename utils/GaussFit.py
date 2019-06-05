@@ -104,110 +104,7 @@ def ReadFit(X, I, membraneX, membraneI, Fitaround
         return Thickness, Time 
 
     
-def FinalShiftFit(Block_Actin, Block_Membrane, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time, t):
-    
-  meanActin = 0
-  meanMembrane = 0
-    
-  Total_Block_Actin = []
-  Total_Block_Membrane = []
-  if len(Block_Actin) > 0 and len(Block_Membrane) > 0: 
-    for i in range(0, len(Block_Actin)):
-        try:
-           x = Block_Actin[i][0]
-           y = Block_Membrane[i][0]
-           z = Block_Actin[i][1]
-           w = Block_Membrane[i][1]
-        except IndexError:
-            continue
-         
-        X = Block_Actin[i][0]
-        I = Block_Actin[i][1]
-        
-        membraneimageX = Block_Membrane[i][0]
-        membraneimageI = Block_Membrane[i][1]
-        
-        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround, inisigmaguess)
-       
-        
-        GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
-         
 
-        
-        Total_Block_Actin.append([GaussFit.gauss_params, X, I])
-        Total_Block_Membrane.append([membraneimageGaussFit.gauss_params,membraneimageX,membraneimageI])
-       
- 
-
- 
-    
-    Shift_Actin = []
-    Shift_Membrane = []
-    
-
-
-    
-    
-    for i in range(0, len(Total_Block_Membrane)): 
-        Membrane_param, Membrane_X, Membrane_I = Total_Block_Membrane[i]
-        Actin_param, Actin_X, Actin_I = Total_Block_Actin[i]
-        
-        shift = Membrane_param[2]
-        
-        Membrane_X = Membrane_X - shift
-        Actin_X = Actin_X - shift
-        Shift_Membrane.append([Membrane_X, Membrane_I])  
-        Shift_Actin.append([Actin_X, Actin_I])
-    
-    
-    Shift_Membrane = np.asarray(Shift_Membrane)
-    oneDMembrane = np.mean(Shift_Membrane, axis = 0)
-    Shift_Actin = np.asarray(Shift_Actin)
-    oneDActin = np.mean(Shift_Actin, axis = 0)
-    plt.plot(oneDActin[0],oneDActin[1])
-    plt.plot(oneDMembrane[0],oneDMembrane[1])
-    plt.title('Mean Membrane-Actin Shifted')
-    
-    
-    
-    membraneimageGaussFit = Linescan(oneDMembrane[0],oneDMembrane[1], Fitaround, inisigmaguess)
-       
-        
-    GaussFit = Linescan(oneDActin[0],oneDActin[1], Fitaround, inisigmaguess)
-    
-    
-    
-    CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf, 2)  
-    CortexThickness.get_h_i_c()
-   
-        
-
-        
-        
-    if CortexThickness.h is not None and abs(CortexThickness.h) < 1.0E100:
-            
-             
-               print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
-               print("Actin Fit:", GaussFit.gauss_params ) 
-               CortexThickness.plot_lss()
-               CortexThickness.plot_fits()
-               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), abs(CortexThickness.X_c), (CortexThickness.i_c))
-               
-               
-               Time.append(t)
-               Thickness.append(abs(CortexThickness.h)) 
-               Intensity.append((oneDActin[1].max()))   
-               
-                     
-   
-    else:
-                  Thickness.append(0) 
-                  Intensity.append(0)
-                  
-                  Time.append(0)
-    
-    
     
     
 def ShiftFit(Block_Actin, Block_Membrane,BlockAverageActin,BlockAverageMembrane, Time_unit, Xcalibration, Fitaround
@@ -316,10 +213,7 @@ def SelectScan(membraneimage, image, Xcalibration, N):
     for i in range(image.shape[1]):
         X = []
         I = []
-        membraneimageX = []
-        membraneimageI = []
         strip = image[:image.shape[0],i]
-        membraneimagestrip = membraneimage[:membraneimage.shape[0],i]
         for j in range(strip.shape[0]):
            X.append(j * Xcalibration)
            I.append(strip[j])
@@ -339,16 +233,15 @@ def SelectScan(membraneimage, image, Xcalibration, N):
         Measureindex.append([index, value])
         
         
-    SortedMeasureindex =  sorted(Measureindex, key = takeFirst)     
+    SortedMeasureindex =  sorted(Measureindex, key = takeSecond, reverse = True)     
     
     return SortedMeasureindex
     
+ 
     
-def StripFit( membraneimage,image,N, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Intensity,Peak_Actin, Block_Actin, Peak_Membrane, Block_Membrane,BlockAverageActin,BlockAverageMembrane,Time, t):
+def MegaFit(membraneimage, image, N, Time_unit, Xcalibration,showaftertime, Fitaround, psf, inisigmaguess, 
+            Thickness, Intensity,Peak_Actin, Block_Actin, Peak_Membrane, Block_Membrane,BlockAverageActin,BlockAverageMembrane,Time, ID ):
     
-    
-    PeakDiffArray = []
     SortedMeasureindex = SelectScan(membraneimage, image, Xcalibration, N)
     
     
@@ -374,47 +267,86 @@ def StripFit( membraneimage,image,N, Time_unit, Xcalibration, Fitaround
         membraneimageX = np.asarray(membraneimageX)
         membraneimageI = np.asarray(membraneimageI)
      
-        
-        
+        ID.append(int(i / Time) + 1)
+        print('ID:', int(i / Time) + 1, 'Maxint:', maxintensity)
         membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround, inisigmaguess)
        
         
         GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
        
-        PeakActin = GaussFit.gauss_params[2]
-        PeakMembrane = membraneimageGaussFit.gauss_params[2]
-        if(abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration and abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration):
-          Block_Actin.append([GaussFit.gauss_params, X, I] )
-          Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI] )
-        
-       
+      
+        Block_Actin.append([GaussFit.gauss_params, X, I] )
+        Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI] )
         
         
-    ShiftFit(Block_Actin, Block_Membrane,BlockAverageActin,BlockAverageMembrane, Time_unit, Xcalibration, Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Intensity,   Time, t)
+        Shift_Actin = []
+        Shift_Membrane = []
     
+
+
+    
+        for i in range(0, len(Block_Membrane)): 
+            Membrane_param, Membrane_X, Membrane_I = Block_Membrane[i]
+            Actin_param, Actin_X, Actin_I = Block_Actin[i]
+        
+            shift = Membrane_param[2]
+        
+            Membrane_X = Membrane_X - shift
+            Actin_X = Actin_X - shift
+        
+            Shift_Membrane.append([Membrane_X, Membrane_I])  
+            Shift_Actin.append([Actin_X, Actin_I])
+        
+
+    
+    Shift_Membrane = np.asarray(Shift_Membrane)
+    
+    
+    
+    Shift_Actin = np.asarray(Shift_Actin)
+   
     
 
     
-def StripFitTime( X, I, membraneimageX, membraneimageI, Time_unit,Xcalibration,  Fitaround
-             , psf, inisigmaguess, showaftertime,Thickness, Intensity, Block_Actin, Block_Membrane,  Time, t):
     
-    
-        
-        
-        membraneimageGaussFit = Linescan(membraneimageX,membraneimageI, Fitaround, inisigmaguess)
+    for i in range(0, len(Shift_Actin)):
+      membraneimageGaussFit = Linescan(Shift_Membrane[i][0],Shift_Membrane[i][1], Fitaround, inisigmaguess)
        
         
-        GaussFit = Linescan(X,I, Fitaround, inisigmaguess)
-       
-        PeakActin = GaussFit.gauss_params[2]
-        PeakMembrane = membraneimageGaussFit.gauss_params[2]
-        if(abs(PeakActin - np.argmax(I)* Xcalibration) < 0.5* Xcalibration and abs(PeakMembrane - np.argmax(membraneimageI)* Xcalibration) < 0.5* Xcalibration):
-          Block_Actin.append([GaussFit.gauss_params, X, I]) 
-          Block_Membrane.append([membraneimageGaussFit.gauss_params, membraneimageX, membraneimageI])
+      GaussFit = Linescan(Shift_Actin[i][0],Shift_Actin[i][1], Fitaround, inisigmaguess)
+    
+    
+    
+      CortexThickness = Cortex(membraneimageGaussFit,GaussFit,psf, 2)  
+      CortexThickness.get_h_i_c()
+    
         
 
-     
+        
+        
+      if CortexThickness.h is not None and abs(CortexThickness.h) < 1.0E100:
+            
+             if i%showaftertime == 0:   
+               print("Membrane Fit: (Amp, Sigma, PeakPos, C)", membraneimageGaussFit.gauss_params )
+               print("Actin Fit:", GaussFit.gauss_params ) 
+               CortexThickness.plot_lss()
+               CortexThickness.plot_fits()
+               print("Thickness (nm), center cortex , cortical actin intensity (from fit)",1000*abs(CortexThickness.h), abs(CortexThickness.X_c), (CortexThickness.i_c))
+               
+               
+             Thickness.append(abs(CortexThickness.h)) 
+             Intensity.append((Shift_Actin[i][1].max()))   
+               
+                     
+   
+      else:
+                  Thickness.append(0) 
+                  Intensity.append(0)
+                  
+        
+ 
+    
+ 
         
     
 def fit_func(x, a, sigma, mu, c ):
@@ -729,7 +661,12 @@ class Cortex():
                 self.h, self.i_c = p1
                 actin_ls_mean = np.mean(self.actin.i[:self.actin.x_out_lower_index+10])
                 self.density = (self.i_c - self.actin.i_in) / actin_ls_mean
-                self.X_c = self.memb.x_peak + (self.h) / 2.
+                
+                if self.memb.x_peak > self.actin.x_peak:
+                  self.X_c = self.memb.x_peak - self.h / 2
+                else:
+                  self.X_c = self.memb.x_peak + self.h / 2 
+                
                 
     
     def residuals(self,p):

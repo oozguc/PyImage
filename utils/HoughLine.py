@@ -103,20 +103,21 @@ def compute_distance(X, centroids, n_clusters):
             row_norm = norm(X - centroids[k, :], axis=1)
             distance[:, k] = np.square(row_norm)
         return distance
-def Correlation_plot(pointsA, pointsB, id):
+def Correlation_plot(pointsA, pointsB,x_min,x_max,y_min,y_max, id):
     
     fig, ax = plt.subplots()
     
+    ax.axis([x_min,x_max, y_min, y_max])
     ax.plot(pointsB, pointsA, '.b', alpha = 0.6, label = 'Correlation plot')
     for i in range(0, len(id)):
      currentid = id[i]
      try:
-           x = pointsB[currentid-1]
-           y = pointsA[currentid-1]
+           x = pointsB[i]
+           y = pointsA[i]
           
      except IndexError:
             continue
-     ax.text(pointsB[currentid-1], pointsA[currentid-1], str(currentid)) 
+     ax.text(pointsB[i], pointsA[i], str(currentid)) 
      ax.set_xlabel('Intensity')
      ax.set_ylabel('Thickness (um)')
     
