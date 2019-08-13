@@ -157,6 +157,39 @@ def singleplot(imageA, titleA):
     plt.imshow(imageA, cmap = cm.Spectral)
     plt.title(titleA)
     plt.show()
+    
+def quadplot(imageA, imageB, imageC, imageD, titleA, titleB, titleC, titleD):
+    fig, axes = plt.subplots(1, 4, figsize=(15, 6))
+    ax = axes.ravel()
+    ax[0].imshow(imageA, cmap=cm.Spectral)
+    ax[0].set_title(titleA)
+    
+    ax[1].imshow(imageB, cmap=cm.Spectral)
+    ax[1].set_title(titleB)
+    
+    ax[2].imshow(imageC, cmap=cm.Spectral)
+    ax[2].set_title(titleC)
+    
+    ax[3].imshow(imageD, cmap=cm.Spectral)
+    ax[3].set_title(titleD)
+    plt.tight_layout()
+    plt.show()
+    
+def tripleplot(imageA, imageB, imageC, titleA, titleB, titleC):
+    fig, axes = plt.subplots(1, 3, figsize=(15, 6))
+    ax = axes.ravel()
+    ax[0].imshow(imageA, cmap=cm.Spectral)
+    ax[0].set_title(titleA)
+    
+    ax[1].imshow(imageB, cmap=cm.Spectral)
+    ax[1].set_title(titleB)
+    
+    ax[2].imshow(imageC, cmap=cm.Spectral)
+    ax[2].set_title(titleC)
+    
+    plt.tight_layout()
+    plt.show()
+    
 def doubleplot(imageA, imageB, titleA, titleB):
     fig, axes = plt.subplots(1, 2, figsize=(15, 6))
     ax = axes.ravel()
